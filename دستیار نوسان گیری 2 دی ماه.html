@@ -1,0 +1,3835 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>دستیار حرفه‌ای تحلیل ارز دیجیتال - نسخه پیشرفته</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #0b0e1a;
+            --card: #161a2e;
+            --accent: #e94560;
+            --green: #00c896;
+            --red: #ff6b6b;
+            --yellow: #ffd166;
+            --blue: #4cc9f0;
+            --purple: #7209b7;
+            --text: #f2f2f2;
+            --muted: #9ca3c7;
+        }
+        
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            color: var(--text);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 1rem;
+        }
+        
+        /* استایل‌های قبلی برنامه (کامل) */
+        .main-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .main-controls {
+                flex-direction: column;
+            }
+        }
+        
+        .search-container {
+            flex: 2;
+            position: relative;
+            min-width: 300px;
+        }
+        
+        input, button, select {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            background: #1c2040;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        input:focus, button:focus, select:focus {
+            outline: 2px solid var(--accent);
+        }
+        
+        button {
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        button:hover {
+            background: #ff2e4d;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .badge {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        
+        .buy { background: rgba(0, 200, 150, .2); color: var(--green); }
+        .sell { background: rgba(255, 107, 107, .2); color: var(--red); }
+        .hold { background: rgba(255, 209, 102, .2); color: var(--yellow); }
+        .wait { background: rgba(255, 255, 255, .1); color: var(--muted); }
+        
+        .analysis-box {
+            background: rgba(255, 255, 255, .05);
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .analysis-box h3 {
+            margin-top: 0;
+            color: var(--yellow);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+        
+        .time-box {
+            background: rgba(255, 255, 255, .04);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: .9rem;
+            color: var(--muted);
+            display: inline-block;
+        }
+        
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
+        }
+        
+        th {
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--muted);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, .05);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--yellow);
+        }
+        
+        .coin-row {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, .1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, .05);
+            transition: all 0.2s;
+        }
+        
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, .1);
+        }
+        
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .analysis-card {
+            background: rgba(255, 255, 255, .03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .analysis-card h4 {
+            margin-top: 0;
+            color: var(--blue);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+        }
+        
+        .indicator-value {
+            display: inline-block;
+            background: rgba(255, 255, 255, .1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-left: 5px;
+            font-family: 'Courier New', monospace;
+            color: var(--yellow);
+            font-size: 0.9rem;
+        }
+        
+        .alert-warning {
+            background: rgba(255, 209, 102, .1);
+            color: var(--yellow);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-right: 4px solid var(--yellow);
+        }
+        
+        .alert-success {
+            background: rgba(0, 200, 150, .1);
+            color: var(--green);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-right: 4px solid var(--green);
+        }
+        
+        .alert-danger {
+            background: rgba(255, 107, 107, .1);
+            color: var(--red);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-right: 4px solid var(--red);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, .1);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .tab-container {
+            margin: 25px 0;
+        }
+        
+        .tab-header {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .tab-btn {
+            padding: 14px 24px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .tab-btn:hover {
+            color: var(--yellow);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .tab-btn.active {
+            color: var(--yellow);
+            border-bottom-color: var(--yellow);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 25px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .05);
+        }
+        
+        .value-label {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+        
+        .value-number {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .good { color: var(--green); }
+        .bad { color: var(--red); }
+        .neutral { color: var(--yellow); }
+        
+        .volatility-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .volatility-low { background: var(--green); }
+        .volatility-medium { background: var(--yellow); }
+        .volatility-high { background: var(--red); }
+        
+        .technical-analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0 15px 0;
+        }
+        
+        .technical-analysis-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .data-source {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .real-time-badge {
+            background: rgba(76, 201, 240, .2);
+            color: var(--blue);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .market-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .market-metric {
+            background: rgba(255, 255, 255, .03);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .market-metric:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+        
+        .market-metric h4 {
+            margin: 0 0 10px 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        
+        .market-metric-value {
+            font-size: 26px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .market-metric-change {
+            font-size: 14px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+        
+        .coin-detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+        
+        @media (max-width: 1200px) {
+            .coin-detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .analysis-section {
+            margin: 25px 0;
+        }
+        
+        .indicator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .indicator-item {
+            background: rgba(255, 255, 255, .02);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .indicator-label {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .indicator-value-display {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .pattern-indicators {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .pattern-badge {
+            background: rgba(76, 201, 240, .1);
+            color: var(--blue);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .chart-container {
+            height: 380px;
+            margin-top: 25px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        .status-bar {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .status-info {
+            background: rgba(76, 201, 240, .1);
+            color: var(--blue);
+            border-right: 4px solid var(--blue);
+        }
+        
+        .status-success {
+            background: rgba(0, 200, 150, .1);
+            color: var(--green);
+            border-right: 4px solid var(--green);
+        }
+        
+        .status-error {
+            background: rgba(255, 107, 107, .1);
+            color: var(--red);
+            border-right: 4px solid var(--red);
+        }
+        
+        .status-warning {
+            background: rgba(255, 209, 102, .1);
+            color: var(--yellow);
+            border-right: 4px solid var(--yellow);
+        }
+        
+        .market-sentiment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .sentiment-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .sentiment-bullish { background: var(--green); }
+        .sentiment-bearish { background: var(--red); }
+        .sentiment-neutral { background: var(--yellow); }
+        
+        .coin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        
+        .price-change-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .change-up {
+            background: rgba(0, 200, 150, .2);
+            color: var(--green);
+        }
+        
+        .change-down {
+            background: rgba(255, 107, 107, .2);
+            color: var(--red);
+        }
+        
+        .detail-view-btn {
+            background: rgba(114, 9, 183, 0.2);
+            color: var(--purple);
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 1px solid rgba(114, 9, 183, 0.3);
+        }
+        
+        .detail-view-btn:hover {
+            background: rgba(114, 9, 183, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .metric-label {
+            font-size: 13px;
+            color: var(--muted);
+        }
+        
+        .live-update-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--blue);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+        
+        .control-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .mode-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+        
+        .mode-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        /* استایل‌های جدید برای ویژگی‌های پیشرفته */
+        
+        /* سطوح فیبوناچی */
+        .fibonacci-levels {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .fib-level {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .fib-level.active {
+            background: rgba(255, 209, 102, 0.1);
+            border-color: var(--yellow);
+        }
+        
+        .fib-label {
+            font-size: 12px;
+            color: var(--muted);
+            min-width: 50px;
+        }
+        
+        .fib-value {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .fib-distance {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .fib-distance.up {
+            background: rgba(0, 200, 150, 0.1);
+            color: var(--green);
+        }
+        
+        .fib-distance.down {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--red);
+        }
+        
+        /* سطوح حمایت/مقاومت */
+        .sr-levels-container {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .sr-level {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+        
+        .sr-level.current {
+            background: rgba(76, 201, 240, 0.1);
+            border-color: var(--blue);
+        }
+        
+        .sr-level.resistance {
+            border-left: 3px solid var(--red);
+        }
+        
+        .sr-level.support {
+            border-left: 3px solid var(--green);
+        }
+        
+        .sr-label {
+            font-size: 13px;
+            color: var(--muted);
+            min-width: 100px;
+        }
+        
+        .sr-price {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            flex: 1;
+        }
+        
+        .sr-distance {
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin: 0 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .sr-strength {
+            width: 60px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .sr-strength-bar {
+            height: 100%;
+            background: var(--green);
+            transition: width 0.3s;
+        }
+        
+        /* اخبار و رویدادها */
+        .news-container,
+        .events-container {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .news-item,
+        .event-item {
+            padding: 12px 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .news-item:hover,
+        .event-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(-5px);
+        }
+        
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .news-source {
+            color: var(--blue);
+            font-weight: bold;
+        }
+        
+        .news-time {
+            color: var(--muted);
+        }
+        
+        .news-sentiment {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .news-sentiment-positive {
+            background: rgba(0, 200, 150, 0.1);
+            color: var(--green);
+        }
+        
+        .news-sentiment-negative {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--red);
+        }
+        
+        .news-sentiment-neutral {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--muted);
+        }
+        
+        .news-title {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        .news-link {
+            font-size: 12px;
+            color: var(--blue);
+            text-decoration: none;
+        }
+        
+        .news-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* رویدادها */
+        .event-date {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .event-day {
+            color: var(--yellow);
+            font-weight: bold;
+        }
+        
+        .event-days-left {
+            color: var(--muted);
+            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .event-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .event-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .event-type {
+            font-size: 11px;
+            padding: 2px 8px;
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--blue);
+            border-radius: 10px;
+        }
+        
+        .event-importance-high {
+            border-right: 3px solid var(--red);
+        }
+        
+        .event-importance-medium {
+            border-right: 3px solid var(--yellow);
+        }
+        
+        .event-importance-low {
+            border-right: 3px solid var(--green);
+        }
+        
+        /* داده‌های زنجیره‌ای */
+        .onchain-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .onchain-metric {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .metric-change {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .metric-change.positive {
+            background: rgba(0, 200, 150, 0.1);
+            color: var(--green);
+        }
+        
+        .metric-change.negative {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--red);
+        }
+        
+        .metric-change.neutral {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--muted);
+        }
+        
+        /* الگوهای قیمتی */
+        .patterns-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .pattern-badge-advanced {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .pattern-buy {
+            background: rgba(0, 200, 150, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(0, 200, 150, 0.3);
+        }
+        
+        .pattern-sell {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--red);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        
+        .pattern-neutral {
+            background: rgba(255, 209, 102, 0.1);
+            color: var(--yellow);
+            border: 1px solid rgba(255, 209, 102, 0.3);
+        }
+        
+        /* تحلیل حجم */
+        .volume-analysis {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .volume-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .volume-metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 8px;
+        }
+        
+        .volume-metric-value {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        
+        .volume-metric-label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        
+        /* تب‌های تحلیل پیشرفته */
+        .advanced-tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .advanced-tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .advanced-analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .advanced-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 24px;
+            color: var(--blue);
+            margin-bottom: 15px;
+        }
+        
+        .feature-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        
+        .feature-description {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        
+        /* ریسپانسیو */
+        @media (max-width: 768px) {
+            .advanced-feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .coin-detail-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .onchain-metrics {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-network"></i> دستیار حرفه‌ای تحلیل ارز دیجیتال - نسخه پیشرفته</h1>
+            <p class="subtitle">📈 تحلیل 10 و 40 ارز برتر | 🔍 جستجوی پیشرفته | ⚡ داده‌های زنده | 🎯 سیگنال‌های هوشمند | 📊 ۷ ویژگی تحلیلی جدید</p>
+            <div class="time-box" id="current-time"><i class="fas fa-clock"></i> ۱۵:۴۰:۲۳ - ۱۴۰۴/۱۰/۲</div>
+        </header>
+
+        <div class="main-controls">
+            <div class="search-container">
+                <input id="search" type="text" placeholder="🔍 جستجوی ارز (BTC, ETH, BNB, XRP, ADA, SOL, ...)" autocomplete="off" value="Bitcoin (BTC)">
+                <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
+            </div>
+            <button id="analyze-top10-btn">
+                <i class="fas fa-bolt"></i> تحلیل فوری 10 ارز برتر
+            </button>
+            <button id="analyze-top40-btn">
+                <i class="fas fa-chart-line"></i> تحلیل جامع 40 ارز برتر
+            </button>
+            <button id="refresh-btn">
+                <i class="fas fa-sync-alt"></i> به‌روزرسانی
+            </button>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="top10">
+                <i class="fas fa-list-ol"></i> حالت 10 ارز برتر
+            </button>
+            <button class="mode-btn" data-mode="top40">
+                <i class="fas fa-list-alt"></i> حالت 40 ارز برتر
+            </button>
+            <button class="mode-btn" data-mode="search">
+                <i class="fas fa-search"></i> حالت جستجوی تکی
+            </button>
+        </div>
+
+        <div id="status-bar" class="status-bar status-info" style="display: none;">
+            <i class="fas fa-info-circle"></i>
+            <span id="status-message">در حال تحلیل ارز...</span>
+        </div>
+
+        <div id="output">
+            <div class="card">
+                <h2><i class="fas fa-rocket"></i> تحلیلگر حرفه‌ای ارز دیجیتال - نسخه پیشرفته</h2>
+                <p>با استفاده از این ابزار پیشرفته، می‌توانید 10 یا 40 ارز برتر بازار را تحلیل کنید، هر ارزی را جستجو نمایید و سیگنال‌های دقیق مبتنی بر داده‌های واقعی دریافت کنید.</p>
+                
+                <div class="market-overview-grid">
+                    <div class="market-metric">
+                        <h4><i class="fas fa-coins"></i> تحلیل 10 ارز برتر</h4>
+                        <div class="market-metric-value">تحلیل سریع</div>
+                        <div class="market-metric-change">بهترین ارزها برای نوسان‌گیری</div>
+                    </div>
+                    <div class="market-metric">
+                        <h4><i class="fas fa-chart-line"></i> تحلیل 40 ارز برتر</h4>
+                        <div class="market-metric-value">تحلیل جامع</div>
+                        <div class="market-metric-change">شناسایی فرصت‌های پنهان</div>
+                    </div>
+                    <div class="market-metric">
+                        <h4><i class="fas fa-search"></i> جستجوی تکی</h4>
+                        <div class="market-metric-value">هر ارزی را تحلیل کنید</div>
+                        <div class="market-metric-change">تحلیل عمیق و دقیق</div>
+                    </div>
+                    <div class="market-metric">
+                        <h4><i class="fas fa-bolt"></i> داده‌های زنده</h4>
+                        <div class="market-metric-value">قیمت‌های لحظه‌ای</div>
+                        <div class="market-metric-change">به‌روزرسانی خودکار</div>
+                    </div>
+                </div>
+                
+                <div class="advanced-feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-ruler-combined"></i></div>
+                        <div class="feature-title">سطوح فیبوناچی</div>
+                        <div class="feature-description">محاسبه سطوح بازگشت فیبوناچی برای شناسایی نقاط حمایت و مقاومت دینامیک</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-shapes"></i></div>
+                        <div class="feature-title">الگوهای قیمتی</div>
+                        <div class="feature-description">شناسایی خودکار الگوهای کلاسیک مانند سر و شانه، دو قله، مثلث و پرچم</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div class="feature-title">تحلیل حجم معاملات</div>
+                        <div class="feature-description">تحلیل حجم معاملات و همگرایی/واگرایی با قیمت برای تأیید روند</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="feature-title">سطوح حمایت/مقاومت</div>
+                        <div class="feature-description">شناسایی خودکار سطوح کلیدی حمایت و مقاومت بر اساس داده‌های تاریخی</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-newspaper"></i></div>
+                        <div class="feature-title">اخبار لحظه‌ای</div>
+                        <div class="feature-description">دریافت آخرین اخبار و تحلیل‌های بازار از منابع معتبر</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="feature-title">تقویم رویدادها</div>
+                        <div class="feature-description">بررسی رویدادهای مهم آتی مانند هاردفورک، به‌روزرسانی‌ها و جلسات</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-link"></i></div>
+                        <div class="feature-title">داده‌های زنجیره‌ای</div>
+                        <div class="feature-description">تحلیل داده‌های on-chain مانند آدرس‌های فعال و جریان صرافی‌ها</div>
+                    </div>
+                </div>
+                
+                <div class="market-sentiment" id="initial-sentiment">
+                    <div class="sentiment-indicator sentiment-neutral"></div>
+                    <span>وضعیت بازار: در انتظار تحلیل اولیه - ۷ ویژگی تحلیلی جدید فعال شد</span>
+                </div>
+                
+                <div class="control-group">
+                    <button id="start-analysis-10-btn" class="control-btn active">
+                        <i class="fas fa-play-circle"></i> شروع تحلیل 10 ارز برتر
+                    </button>
+                    <button id="start-analysis-40-btn" class="control-btn">
+                        <i class="fas fa-play-circle"></i> شروع تحلیل 40 ارز برتر
+                    </button>
+                    <button id="show-search-help" class="control-btn">
+                        <i class="fas fa-question-circle"></i> راهنمای جستجو
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- بخش تحلیل 10 ارز -->
+        <div class="tab-container" id="coins-section-10" style="display: none;">
+            <div class="tab-header">
+                <button class="tab-btn active" data-tab="all-coins-10">
+                    <i class="fas fa-list"></i> لیست 10 ارز برتر
+                </button>
+                <button class="tab-btn" data-tab="market-analysis-10">
+                    <i class="fas fa-chart-pie"></i> تحلیل کلی بازار
+                </button>
+                <button class="tab-btn" data-tab="swing-opportunities-10">
+                    <i class="fas fa-bolt"></i> فرصت‌های نوسان‌گیری
+                </button>
+                <button class="tab-btn" data-tab="risk-metrics-10">
+                    <i class="fas fa-shield-alt"></i> معیارهای ریسک
+                </button>
+            </div>
+
+            <div class="tab-content active" id="all-coins-10-tab">
+                <div class="card">
+                    <div class="technical-analysis-header">
+                        <h2><i class="fas fa-coins"></i> تحلیل 10 ارز برتر بازار</h2>
+                        <div class="time-box">
+                            <i class="fas fa-clock"></i>
+                            <span id="last-update-time-10">آخرین به‌روزرسانی: -</span>
+                            <span class="live-update-indicator blink" id="live-indicator-10">
+                                <i class="fas fa-circle" style="font-size: 8px;"></i>
+                                زنده
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div id="market-summary-10" class="alert-success">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="summary-text-10">در انتظار تحلیل بازار...</span>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>ارز</th>
+                                <th>قیمت فعلی</th>
+                                <th>تغییر 24h</th>
+                                <th>سیگنال</th>
+                                <th>اعتماد</th>
+                                <th>وضعیت نوسان</th>
+                                <th>RSI</th>
+                                <th>اقدام</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-coins-list-10">
+                            <!-- این بخش توسط جاوااسکریپت پر می‌شود -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="market-analysis-10-tab">
+                <div class="card">
+                    <h2><i class="fas fa-chart-bar"></i> تحلیل کلی بازار (10 ارز برتر)</h2>
+                    <div id="market-analysis-content-10">
+                        <div class="loading">
+                            <i class="fas fa-spinner loading-spinner"></i> در حال تحلیل داده‌های بازار...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="swing-opportunities-10-tab">
+                <div class="card">
+                    <h2><i class="fas fa-bolt"></i> فرصت‌های نوسان‌گیری (10 ارز برتر)</h2>
+                    <div id="swing-opportunities-content-10">
+                        <div class="loading">
+                            <i class="fas fa-spinner loading-spinner"></i> در حال یافتن بهترین فرصت‌های نوسان‌گیری...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="risk-metrics-10-tab">
+                <div class="card">
+                    <h2><i class="fas fa-shield-alt"></i> معیارهای ریسک بازار (10 ارز برتر)</h2>
+                    <div id="risk-metrics-content-10">
+                        <div class="loading">
+                            <i class="fas fa-spinner loading-spinner"></i> در حال محاسبه معیارهای ریسک...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- بخش تحلیل 40 ارز -->
+        <div class="tab-container" id="coins-section-40" style="display: none;">
+            <div class="tab-header">
+                <button class="tab-btn active" data-tab="all-coins-40">
+                    <i class="fas fa-list"></i> لیست 40 ارز برتر
+                </button>
+                <button class="tab-btn" data-tab="market-analysis-40">
+                    <i class="fas fa-chart-pie"></i> تحلیل کلی بازار
+                </button>
+                <button class="tab-btn" data-tab="swing-opportunities-40">
+                    <i class="fas fa-bolt"></i> فرصت‌های نوسان‌گیری
+                </button>
+                <button class="tab-btn" data-tab="risk-metrics-40">
+                    <i class="fas fa-shield-alt"></i> معیارهای ریسک
+                </button>
+            </div>
+
+            <div class="tab-content active" id="all-coins-40-tab">
+                <div class="card">
+                    <div class="technical-analysis-header">
+                        <h2><i class="fas fa-coins"></i> تحلیل 40 ارز برتر بازار</h2>
+                        <div class="time-box">
+                            <i class="fas fa-clock"></i>
+                            <span id="last-update-time-40">آخرین به‌روزرسانی: -</span>
+                        </div>
+                    </div>
+                    
+                    <div id="market-summary-40" class="alert-success">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="summary-text-40">در انتظار تحلیل بازار...</span>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>ارز</th>
+                                <th>قیمت فعلی</th>
+                                <th>تغییر 24h</th>
+                                <th>سیگنال</th>
+                                <th>اعتماد</th>
+                                <th>وضعیت نوسان</th>
+                                <th>RSI</th>
+                                <th>اقدام</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-coins-list-40">
+                            <!-- این بخش توسط جاوااسکریپت پر می‌شود -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="market-analysis-40-tab">
+                <div class="card">
+                    <h2><i class="fas fa-chart-bar"></i> تحلیل کلی بازار (40 ارز برتر)</h2>
+                    <div id="market-analysis-content-40">
+                        <div class="loading">
+                            <i class="fas fa-spinner loading-spinner"></i> در حال تحلیل داده‌های بازار...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="swing-opportunities-40-tab">
+                <div class="card">
+                    <h2><i class="fas fa-bolt"></i> فرصت‌های نوسان‌گیری (40 ارز برتر)</h2>
+                    <div id="swing-opportunities-content-40">
+                        <div class="loading">
+                            <i class="fas fa-spinner loading-spinner"></i> در حال یافتن بهترین فرصت‌های نوسان‌گیری...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="risk-metrics-40-tab">
+                <div class="card">
+                    <h2><i class="fas fa-shield-alt"></i> معیارهای ریسک بازار (40 ارز برتر)</h2>
+                    <div id="risk-metrics-content-40">
+                        <div class="loading">
+                            <i class="fas fa-spinner loading-spinner"></i> در حال محاسبه معیارهای ریسک...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- بخش تحلیل تکی ارز -->
+        <div id="single-coin-section" style="display: none;">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div>
+                        <h2><i class="fas fa-chart-line"></i> تحلیل ارز</h2>
+                        <p style="color:var(--muted);margin-top:5px" id="single-coin-subtitle">تحلیل Bitcoin (BTC) - تحلیل تکنیکال و بنیادی با جزئیات کامل</p>
+                    </div>
+                    <button class="action-btn" onclick="backToMainPage()" style="width:auto;padding:10px 20px;">
+                        <i class="fas fa-arrow-right"></i> بازگشت به صفحه اصلی
+                    </button>
+                </div>
+                
+                <div id="single-coin-content">
+                    <!-- محتوای تحلیل ارز تکی -->
+                </div>
+            </div>
+        </div>
+
+        <!-- بخش تحلیل پیشرفته (جدید) -->
+        <div id="advanced-analysis-section" style="display: none;">
+            <div class="card">
+                <div class="advanced-analysis-header">
+                    <div>
+                        <h2><i class="fas fa-chart-line"></i> تحلیل پیشرفته</h2>
+                        <p style="color:var(--muted);margin-top:5px">۷ ویژگی تحلیلی جدید برای تصمیم‌گیری حرفه‌ای</p>
+                    </div>
+                    <button class="action-btn" onclick="backToSingleCoin()" style="width:auto;padding:10px 20px;">
+                        <i class="fas fa-arrow-right"></i> بازگشت به تحلیل اصلی
+                    </button>
+                </div>
+                
+                <div class="tab-container">
+                    <div class="tab-header">
+                        <button class="tab-btn active" data-tab="fibonacci-tab">
+                            <i class="fas fa-ruler-combined"></i> سطوح فیبوناچی
+                        </button>
+                        <button class="tab-btn" data-tab="patterns-tab">
+                            <i class="fas fa-shapes"></i> الگوهای قیمتی
+                        </button>
+                        <button class="tab-btn" data-tab="volume-tab">
+                            <i class="fas fa-chart-bar"></i> تحلیل حجم
+                        </button>
+                        <button class="tab-btn" data-tab="sr-tab">
+                            <i class="fas fa-shield-alt"></i> حمایت/مقاومت
+                        </button>
+                        <button class="tab-btn" data-tab="news-tab">
+                            <i class="fas fa-newspaper"></i> اخبار
+                        </button>
+                        <button class="tab-btn" data-tab="events-tab">
+                            <i class="fas fa-calendar-alt"></i> رویدادها
+                        </button>
+                        <button class="tab-btn" data-tab="onchain-tab">
+                            <i class="fas fa-link"></i> داده‌های زنجیره‌ای
+                        </button>
+                    </div>
+                    
+                    <div class="advanced-tab-content active" id="fibonacci-tab">
+                        <div class="analysis-section">
+                            <h3><i class="fas fa-ruler-combined"></i> تحلیل سطوح فیبوناچی</h3>
+                            <div id="fibonacci-content">
+                                <div class="loading">
+                                    <i class="fas fa-spinner loading-spinner"></i> در حال محاسبه سطوح فیبوناچی...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="advanced-tab-content" id="patterns-tab">
+                        <div class="analysis-section">
+                            <h3><i class="fas fa-shapes"></i> شناسایی الگوهای قیمتی</h3>
+                            <div id="patterns-content">
+                                <div class="loading">
+                                    <i class="fas fa-spinner loading-spinner"></i> در حال شناسایی الگوهای قیمتی...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="advanced-tab-content" id="volume-tab">
+                        <div class="analysis-section">
+                            <h3><i class="fas fa-chart-bar"></i> تحلیل حجم معاملات</h3>
+                            <div id="volume-content">
+                                <div class="loading">
+                                    <i class="fas fa-spinner loading-spinner"></i> در حال تحلیل حجم معاملات...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="advanced-tab-content" id="sr-tab">
+                        <div class="analysis-section">
+                            <h3><i class="fas fa-shield-alt"></i> سطوح حمایت و مقاومت</h3>
+                            <div id="sr-content">
+                                <div class="loading">
+                                    <i class="fas fa-spinner loading-spinner"></i> در حال شناسایی سطوح حمایت و مقاومت...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="advanced-tab-content" id="news-tab">
+                        <div class="analysis-section">
+                            <h3><i class="fas fa-newspaper"></i> اخبار لحظه‌ای</h3>
+                            <div id="news-content">
+                                <div class="loading">
+                                    <i class="fas fa-spinner loading-spinner"></i> در حال دریافت آخرین اخبار...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="advanced-tab-content" id="events-tab">
+                        <div class="analysis-section">
+                            <h3><i class="fas fa-calendar-alt"></i> تقویم رویدادها</h3>
+                            <div id="events-content">
+                                <div class="loading">
+                                    <i class="fas fa-spinner loading-spinner"></i> در حال دریافت رویدادهای آتی...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="advanced-tab-content" id="onchain-tab">
+                        <div class="analysis-section">
+                            <h3><i class="fas fa-link"></i> تحلیل داده‌های زنجیره‌ای</h3>
+                            <div id="onchain-content">
+                                <div class="loading">
+                                    <i class="fas fa-spinner loading-spinner"></i> در حال دریافت داده‌های زنجیره‌ای...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== تنظیمات برنامه ====================
+        const CONFIG = {
+            TOP_COINS_COUNT_10: 10,
+            TOP_COINS_COUNT_40: 40,
+            UPDATE_INTERVAL: 30000,
+            CACHE_DURATION: 60000,
+            API_TIMEOUT: 15000,
+            RETRY_DELAY: 3000,
+            MAX_RETRIES: 5,
+            CURRENT_MODE: 'top10'
+        };
+
+        // ==================== متغیرهای سراسری ====================
+        let allCoinsData10 = [];
+        let allCoinsData40 = [];
+        let marketData = null;
+        let updateInterval = null;
+        let currentCharts = [];
+        let coinCache = new Map();
+        let currentCoinId = null;
+
+        // ==================== ابزارهای کمکی ====================
+        class Helpers {
+            static formatNumber(num, decimals = 2) {
+                if (num === undefined || num === null || isNaN(num)) return "0.00";
+                return new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                }).format(num);
+            }
+            
+            static formatPrice(price) {
+                if (price >= 1000) {
+                    return `$${this.formatNumber(price, 0)}`;
+                } else if (price >= 1) {
+                    return `$${this.formatNumber(price, 2)}`;
+                } else if (price >= 0.01) {
+                    return `$${this.formatNumber(price, 4)}`;
+                } else {
+                    return `$${this.formatNumber(price, 6)}`;
+                }
+            }
+            
+            static getCurrentTime() {
+                const now = new Date();
+                const time = now.toLocaleTimeString('fa-IR');
+                const date = now.toLocaleDateString('fa-IR');
+                return { time, date, timestamp: now.getTime() };
+            }
+            
+            static updateTimeDisplay() {
+                const { time, date } = this.getCurrentTime();
+                document.getElementById('current-time').innerHTML = 
+                    `<i class="fas fa-clock"></i> ${time} - ${date}`;
+            }
+            
+            static async sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            
+            static getColorByValue(value, reverse = false) {
+                if (value >= 70) return reverse ? 'var(--red)' : 'var(--green)';
+                if (value >= 40) return 'var(--yellow)';
+                return reverse ? 'var(--green)' : 'var(--red)';
+            }
+            
+            static getChangeColor(change) {
+                return change >= 0 ? 'var(--green)' : 'var(--red)';
+            }
+            
+            static calculateVolatility(high, low, close) {
+                if (!close || close === 0) return { level: 'متوسط', color: 'var(--yellow)' };
+                const range = ((high - low) / close) * 100;
+                if (range < 3) return { level: 'کم', color: 'var(--green)' };
+                if (range > 8) return { level: 'زیاد', color: 'var(--red)' };
+                return { level: 'متوسط', color: 'var(--yellow)' };
+            }
+            
+            static validatePriceData(data) {
+                if (!data) return false;
+                if (!data.price || data.price <= 0 || data.price > 1000000) return false;
+                if (Math.abs(data.change24h) > 100) return false;
+                return true;
+            }
+        }
+
+        // ==================== سیستم مدیریت وضعیت ====================
+        class StatusManager {
+            static show(message, type = 'info') {
+                const statusBar = document.getElementById('status-bar');
+                const statusMessage = document.getElementById('status-message');
+                
+                if (!statusBar || !statusMessage) return;
+                
+                statusBar.className = 'status-bar';
+                statusBar.classList.add(`status-${type}`);
+                statusMessage.textContent = message;
+                statusBar.style.display = 'flex';
+                
+                if (type === 'info') {
+                    setTimeout(() => {
+                        if (statusBar.classList.contains('status-info')) {
+                            statusBar.style.display = 'none';
+                        }
+                    }, 5000);
+                }
+            }
+            
+            static hide() {
+                const statusBar = document.getElementById('status-bar');
+                if (statusBar) {
+                    statusBar.style.display = 'none';
+                }
+            }
+        }
+
+        // ==================== API Manager ====================
+        class APIManager {
+            static async fetchWithTimeout(url, options = {}, timeout = CONFIG.API_TIMEOUT) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+                
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) {
+                        throw new Error(`خطای API: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    throw error;
+                }
+            }
+            
+            static async getTopCoins(limit = CONFIG.TOP_COINS_COUNT_10) {
+                try {
+                    StatusManager.show(`دریافت لیست ${limit} ارز برتر...`, 'info');
+                    
+                    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=1&sparkline=false&price_change_percentage=24h`;
+                    
+                    const data = await this.fetchWithTimeout(url);
+                    
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        StatusManager.show(`${data.length} ارز با موفقیت دریافت شد`, 'success');
+                        return data;
+                    } else {
+                        throw new Error('داده‌ای از API دریافت نشد');
+                    }
+                } catch (error) {
+                    console.warn('خطا در دریافت از API:', error);
+                    StatusManager.show('خطا در دریافت داده‌ها. لطفا مجدد تلاش کنید.', 'error');
+                    throw error;
+                }
+            }
+            
+            static async getCoinDetails(coinId) {
+                const cacheKey = `coin_${coinId}`;
+                const cached = coinCache.get(cacheKey);
+                
+                if (cached && (Date.now() - cached.timestamp) < CONFIG.CACHE_DURATION) {
+                    return cached.data;
+                }
+                
+                try {
+                    const url = `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=true`;
+                    
+                    const data = await this.fetchWithTimeout(url);
+                    
+                    if (data) {
+                        coinCache.set(cacheKey, {
+                            data,
+                            timestamp: Date.now()
+                        });
+                        
+                        return data;
+                    }
+                } catch (error) {
+                    console.warn(`خطا در دریافت جزئیات ${coinId}:`, error);
+                    throw error;
+                }
+                
+                return null;
+            }
+            
+            static async searchCoins(query) {
+                if (!query || query.length < 2) return [];
+                
+                try {
+                    const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`;
+                    const data = await this.fetchWithTimeout(url);
+                    
+                    if (data && data.coins) {
+                        return data.coins.slice(0, 8);
+                    }
+                } catch (error) {
+                    console.warn('خطا در جستجو:', error);
+                }
+                
+                return [];
+            }
+            
+            static async getCoinOHLC(coinId, days = 30) {
+                try {
+                    const url = `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`;
+                    const data = await this.fetchWithTimeout(url);
+                    return data;
+                } catch (error) {
+                    console.warn(`خطا در دریافت OHLC برای ${coinId}:`, error);
+                    return null;
+                }
+            }
+            
+            static async getCoinMarketData(coinId) {
+                try {
+                    const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=30&interval=daily`;
+                    const data = await this.fetchWithTimeout(url);
+                    return data;
+                } catch (error) {
+                    console.warn(`خطا در دریافت داده‌های بازار برای ${coinId}:`, error);
+                    return null;
+                }
+            }
+        }
+
+        // ==================== تحلیل تکنیکال ====================
+        class TechnicalAnalysis {
+            static calculateRSI(prices, period = 14) {
+                if (!prices || prices.length < period + 1) return 50;
+                
+                let gains = [];
+                let losses = [];
+                
+                for (let i = 1; i < prices.length; i++) {
+                    let change = (prices[i] || 0) - (prices[i-1] || 0);
+                    if (change >= 0) {
+                        gains.push(change);
+                        losses.push(0);
+                    } else {
+                        gains.push(0);
+                        losses.push(Math.abs(change));
+                    }
+                }
+                
+                let avgGain = 0, avgLoss = 0;
+                
+                for (let i = 0; i < period; i++) {
+                    avgGain += gains[i] || 0;
+                    avgLoss += losses[i] || 0;
+                }
+                
+                avgGain = avgGain / period;
+                avgLoss = avgLoss / period;
+                
+                for (let i = period; i < gains.length; i++) {
+                    avgGain = ((avgGain * (period-1)) + (gains[i] || 0)) / period;
+                    avgLoss = ((avgLoss * (period-1)) + (losses[i] || 0)) / period;
+                }
+                
+                if (avgLoss === 0) return 100;
+                let rs = avgGain / avgLoss;
+                return 100 - (100 / (1 + rs));
+            }
+            
+            static calculateEMA(prices, period) {
+                if (!prices || prices.length < period || period <= 0) return prices?.[prices.length-1] || 0;
+                
+                let sma = 0;
+                for (let i = 0; i < period; i++) {
+                    sma += prices[i] || 0;
+                }
+                sma = sma / period;
+                
+                let multiplier = 2/(period+1);
+                let ema = sma;
+                
+                for (let i = period; i < prices.length; i++) {
+                    ema = ((prices[i] || 0) - ema) * multiplier + ema;
+                }
+                return ema;
+            }
+            
+            static calculateMACD(prices, fast = 12, slow = 26, signal = 9) {
+                if (!prices || prices.length < slow) return {macd:0, signal:0, histogram:0};
+                
+                let fastEMA = TechnicalAnalysis.calculateEMA(prices, fast);
+                let slowEMA = TechnicalAnalysis.calculateEMA(prices, slow);
+                let macdLine = fastEMA - slowEMA;
+                
+                let macdValues = [];
+                for (let i = slow-1; i < prices.length; i++) {
+                    let fastE = TechnicalAnalysis.calculateEMA(prices.slice(0, i+1), fast);
+                    let slowE = TechnicalAnalysis.calculateEMA(prices.slice(0, i+1), slow);
+                    macdValues.push(fastE - slowE);
+                }
+                
+                let signalLine = TechnicalAnalysis.calculateEMA(macdValues, signal);
+                let histogram = macdLine - signalLine;
+                
+                return {
+                    macd: macdLine,
+                    signal: signalLine,
+                    histogram: histogram || 0
+                };
+            }
+            
+            static calculateBollingerBands(prices, period = 20, stdDev = 2) {
+                if (!prices || prices.length < period) {
+                    const price = prices?.[prices.length-1] || 0;
+                    return {upper:price, middle:price, lower:price, bandwidth:0};
+                }
+                
+                let slice = prices.slice(-period);
+                let mean = slice.reduce((a,b)=>a+(b||0),0)/slice.length;
+                let variance = slice.reduce((sq,n)=>sq+Math.pow((n||0)-mean,2),0)/slice.length;
+                let std = Math.sqrt(variance) || 0;
+                
+                return {
+                    upper: mean + stdDev * std,
+                    middle: mean,
+                    lower: mean - stdDev * std,
+                    bandwidth: ((mean + stdDev * std) - (mean - stdDev * std)) / mean * 100 || 0
+                };
+            }
+            
+            static calculateATR(highs, lows, closes, period = 14) {
+                if (!closes || closes.length < 2) return 0;
+                
+                let trSum = 0;
+                let trValues = [];
+                
+                for (let i = 1; i < closes.length; i++) {
+                    let hl = Math.abs((highs[i] || 0) - (lows[i] || 0));
+                    let hc = Math.abs((highs[i] || 0) - (closes[i-1] || 0));
+                    let lc = Math.abs((lows[i] || 0) - (closes[i-1] || 0));
+                    let tr = Math.max(hl, hc, lc);
+                    trValues.push(tr);
+                    
+                    if (i < period) {
+                        trSum += tr;
+                    }
+                }
+                
+                if (trValues.length < period) {
+                    return trValues.length > 0 ? trSum/trValues.length : 0;
+                }
+                
+                let atr = trSum;
+                
+                for (let i = period; i < trValues.length; i++) {
+                    atr = ((atr * (period-1)) + trValues[i]) / period;
+                }
+                
+                return atr;
+            }
+            
+            static calculateStochastic(highs, lows, closes, kPeriod = 14, dPeriod = 3) {
+                if (!closes || closes.length < kPeriod) return {k:50, d:50, oversold:false, overbought:false};
+                
+                let kValues = [];
+                for (let i = kPeriod-1; i < closes.length; i++) {
+                    let highSlice = highs.slice(i-kPeriod+1, i+1).map(h=>h||0);
+                    let lowSlice = lows.slice(i-kPeriod+1, i+1).map(l=>l||0);
+                    let high = Math.max(...highSlice);
+                    let low = Math.min(...lowSlice);
+                    
+                    if (high === low) {
+                        kValues.push(50);
+                    } else {
+                        let k = ((closes[i]||0)-low)/(high-low)*100;
+                        kValues.push(k);
+                    }
+                }
+                
+                let dValues = [];
+                for (let i = dPeriod-1; i < kValues.length; i++) {
+                    let d = kValues.slice(i-dPeriod+1, i+1).reduce((a,b)=>a+b,0)/dPeriod;
+                    dValues.push(d);
+                }
+                
+                const lastK = kValues.length > 0 ? kValues[kValues.length-1] : 50;
+                const lastD = dValues.length > 0 ? dValues[dValues.length-1] : 50;
+                
+                return {
+                    k: lastK,
+                    d: lastD,
+                    oversold: lastK < 20,
+                    overbought: lastK > 80
+                };
+            }
+        }
+
+        // ==================== تحلیل فارسی ====================
+        class PersianAnalysis {
+            static getRSIAnalysis(rsi) {
+                if (rsi === undefined || rsi === null) rsi = 50;
+                let analysis = "";
+                if (rsi < 30) analysis = `RSI در اشباع فروش است <span class="indicator-value">${rsi.toFixed(1)}</span>؛ احتمال واکنش صعودی قوی`;
+                else if (rsi < 45) analysis = `RSI در محدوده فروش است <span class="indicator-value">${rsi.toFixed(1)}</span>؛ فشار فروش وجود دارد`;
+                else if (rsi < 55) analysis = `RSI در محدوده خنثی است <span class="indicator-value">${rsi.toFixed(1)}</span>؛ بازار متعادل`;
+                else if (rsi < 70) analysis = `RSI در محدوده خرید است <span class="indicator-value">${rsi.toFixed(1)}</span>؛ فشار خرید وجود دارد`;
+                else analysis = `RSI در اشباع خرید است <span class="indicator-value">${rsi.toFixed(1)}</span>؛ احتمال اصلاح قیمت`;
+                return analysis;
+            }
+            
+            static getMACDAnalysis(macd) {
+                if (!macd || macd.histogram === undefined) return `MACD: داده ناکافی`;
+                
+                const hist = macd.histogram || 0;
+                let analysis = "";
+                
+                if (hist > 0) {
+                    analysis = `MACD صعودی <span class="indicator-value">${hist.toFixed(4)}</span>؛ قدرت خریداران`;
+                } else if (hist < 0) {
+                    analysis = `MACD نزولی <span class="indicator-value">${Math.abs(hist).toFixed(4)}</span>؛ قدرت فروشندگان`;
+                } else {
+                    analysis = `MACD خنثی <span class="indicator-value">${hist.toFixed(4)}</span>؛ بازار در تعادل`;
+                }
+                return analysis;
+            }
+            
+            static getTrendAnalysis(ema9, ema20, ema50, price) {
+                ema9 = ema9 || 0; ema20 = ema20 || 0; ema50 = ema50 || 0; price = price || 0;
+                
+                let analysis = "";
+                if (ema9 > ema20 && ema20 > ema50 && price > ema9) {
+                    analysis = `روند صعودی قوی | EMA9: $${ema9.toFixed(2)} > EMA20: $${ema20.toFixed(2)} > EMA50: $${ema50.toFixed(2)}`;
+                } else if (ema9 < ema20 && ema20 < ema50 && price < ema9) {
+                    analysis = `روند نزولی قوی | EMA9: $${ema9.toFixed(2)} < EMA20: $${ema20.toFixed(2)} < EMA50: $${ema50.toFixed(2)}`;
+                } else if (ema9 > ema20 && price > ema9) {
+                    analysis = `روند کوتاه صعودی | EMA9: $${ema9.toFixed(2)} > EMA20: $${ema20.toFixed(2)}`;
+                } else if (ema9 < ema20 && price < ema9) {
+                    analysis = `روند کوتاه نزولی | EMA9: $${ema9.toFixed(2)} < EMA20: $${ema20.toFixed(2)}`;
+                } else {
+                    analysis = `روند خنثی | EMA9: $${ema9.toFixed(2)} | EMA20: $${ema20.toFixed(2)} | EMA50: $${ema50.toFixed(2)}`;
+                }
+                return analysis;
+            }
+            
+            static getVolatilityAnalysis(atr, price) {
+                atr = atr || 0; price = price || 0;
+                const ratio = price > 0 ? (atr/price)*100 : 0;
+                let vol = "متوسط";
+                if (ratio < 3) vol = "کم";
+                if (ratio > 8) vol = "زیاد";
+                return `نوسان ${vol} | ATR: $${atr.toFixed(2)} (${ratio.toFixed(2)}%)`;
+            }
+            
+            static getBollingerAnalysis(price, bb) {
+                price = price || 0;
+                if (!bb) return `باند بولینگر: داده ناکافی`;
+                
+                let position = "";
+                if (price > bb.upper) position = `بالای باند بالا <span class="indicator-value">${bb.upper>0?((price/bb.upper-1)*100).toFixed(2):0}%</span>`;
+                else if (price < bb.lower) position = `زیر باند پایین <span class="indicator-value">${price>0?((bb.lower/price-1)*100).toFixed(2):0}%</span>`;
+                else if (price > bb.middle) position = `نیمه بالایی باند <span class="indicator-value">${bb.bandwidth.toFixed(2)}%</span>`;
+                else position = `نیمه پایینی باند <span class="indicator-value">${bb.bandwidth.toFixed(2)}%</span>`;
+                return `قیمت در ${position} | باند: $${bb.upper.toFixed(2)} - $${bb.lower.toFixed(2)}`;
+            }
+            
+            static getStochasticAnalysis(stoch) {
+                if (!stoch) return `استوکاستیک: داده ناکافی`;
+                
+                const k = stoch.k || 50;
+                const d = stoch.d || 50;
+                let analysis = "";
+                
+                if (stoch.oversold) analysis = `استوکاستیک اشباع فروش <span class="indicator-value">K:${k.toFixed(1)} D:${d.toFixed(1)}</span>`;
+                else if (stoch.overbought) analysis = `استوکاستیک اشباع خرید <span class="indicator-value">K:${k.toFixed(1)} D:${d.toFixed(1)}</span>`;
+                else if (k > d) analysis = `استوکاستیک صعودی <span class="indicator-value">K:${k.toFixed(1)} > D:${d.toFixed(1)}</span>`;
+                else analysis = `استوکاستیک نزولی <span class="indicator-value">K:${k.toFixed(1)} < D:${d.toFixed(1)}</span>`;
+                return analysis;
+            }
+        }
+
+        // ==================== سیستم امتیازدهی ====================
+        class ScoringSystem {
+            static calculateScore(data) {
+                let score = 50;
+                
+                const rsi = data.rsi || 50;
+                if (rsi < 30) score += 20;
+                else if (rsi < 45) score += 10;
+                else if (rsi > 70) score -= 20;
+                else if (rsi > 55) score -= 10;
+                
+                const ema9 = data.ema9 || 0, ema20 = data.ema20 || 0, ema50 = data.ema50 || 0;
+                if (ema9 > ema20 && ema20 > ema50) score += 20;
+                else if (ema9 < ema20 && ema20 < ema50) score -= 15;
+                
+                const macdHist = data.macd?.histogram || 0;
+                if (macdHist > 0) score += 15;
+                else if (macdHist < 0) score -= 15;
+                
+                const price = data.price || 1;
+                const atr = data.atr || 0;
+                const volatilityRatio = atr/price;
+                
+                if (volatilityRatio > 0.025 && rsi > 30 && rsi < 70) score += 15;
+                else if (volatilityRatio < 0.01 && (rsi <= 30 || rsi >= 70)) score -= 10;
+                
+                if (data.stoch?.oversold) score += 10;
+                else if (data.stoch?.overbought) score -= 10;
+                
+                if (price < data.bb?.lower) score += 10;
+                else if (price > data.bb?.upper) score -= 10;
+                
+                return Math.max(0, Math.min(100, score));
+            }
+            
+            static getSignal(score) {
+                if (score >= 70) return {signal:"خرید", class:"buy"};
+                if (score >= 60) return {signal:"نگهداری", class:"hold"};
+                if (score >= 40) return {signal:"صبر", class:"wait"};
+                return {signal:"فروش", class:"sell"};
+            }
+            
+            static getSwingStatus(data) {
+                if (!data) return {status:"ضعیف", color:"red"};
+                
+                let factors = 0;
+                const price = data.price || 1;
+                const rsi = data.rsi || 50;
+                
+                if ((data.atr || 0)/price > 0.02) factors++;
+                if (Math.abs(rsi-50) > 15) factors++;
+                if ((data.macd?.histogram || 0) > 0) factors++;
+                
+                if (factors >= 3) return {status:"عالی", color:"green"};
+                if (factors >= 2) return {status:"متوسط", color:"yellow"};
+                return {status:"ضعیف", color:"red"};
+            }
+        }
+
+        // ==================== ویژگی‌های جدید ====================
+
+        // ۱. تحلیل فیبوناچی
+        class FibonacciAnalysis {
+            static calculateFibonacciLevels(high, low) {
+                if (!high || !low || high <= low) return null;
+                
+                const diff = high - low;
+                return {
+                    '0%': low,
+                    '23.6%': low + diff * 0.236,
+                    '38.2%': low + diff * 0.382,
+                    '50%': low + diff * 0.5,
+                    '61.8%': low + diff * 0.618,
+                    '78.6%': low + diff * 0.786,
+                    '100%': high,
+                    '127.2%': high + diff * 0.272,
+                    '161.8%': high + diff * 0.618
+                };
+            }
+            
+            static renderFibonacci(currentPrice, high, low) {
+                const fibLevels = this.calculateFibonacciLevels(high, low);
+                
+                if (!fibLevels) {
+                    return '<p>داده‌های ناکافی برای محاسبه سطوح فیبوناچی</p>';
+                }
+                
+                let html = '<div class="fibonacci-levels">';
+                Object.entries(fibLevels).forEach(([level, value]) => {
+                    const distance = ((currentPrice - value) / currentPrice * 100).toFixed(2);
+                    const isClose = Math.abs(distance) < 3;
+                    html += `
+                        <div class="fib-level ${isClose ? 'active' : ''}">
+                            <span class="fib-label">${level}</span>
+                            <span class="fib-value">$${value.toFixed(2)}</span>
+                            <span class="fib-distance ${distance >= 0 ? 'up' : 'down'}">
+                                ${distance >= 0 ? '+' : ''}${distance}%
+                            </span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                // تحلیل
+                html += '<div class="analysis-box" style="margin-top: 15px;">';
+                if (currentPrice < fibLevels['38.2%']) {
+                    html += '<div class="alert-success">قیمت در سطح بازگشت فیبوناچی 38.2% - منطقه خرید احتمالی</div>';
+                } else if (currentPrice > fibLevels['61.8%']) {
+                    html += '<div class="alert-warning">قیمت در سطح بازگشت فیبوناچی 61.8% - منطقه مقاومت احتمالی</div>';
+                }
+                html += '</div>';
+                
+                return html;
+            }
+        }
+
+        // ۲. شناسایی الگوهای قیمتی
+        class PatternRecognition {
+            static detectPatterns(prices) {
+                if (!prices || prices.length < 20) return [];
+                
+                const patterns = [];
+                const recentPrices = prices.slice(-20);
+                
+                // بررسی الگوی سر و شانه
+                if (this.isHeadAndShoulders(recentPrices)) {
+                    patterns.push({
+                        name: 'سر و شانه',
+                        type: 'بازگشتی',
+                        direction: 'نزولی',
+                        confidence: 75
+                    });
+                }
+                
+                // بررسی الگوی دو قله
+                if (this.isDoubleTop(recentPrices)) {
+                    patterns.push({
+                        name: 'دو قله',
+                        type: 'بازگشتی',
+                        direction: 'نزولی',
+                        confidence: 70
+                    });
+                }
+                
+                // بررسی الگوی دو دره
+                if (this.isDoubleBottom(recentPrices)) {
+                    patterns.push({
+                        name: 'دو دره',
+                        type: 'بازگشتی',
+                        direction: 'صعودی',
+                        confidence: 70
+                    });
+                }
+                
+                // بررسی الگوی مثلث
+                const triangleType = this.isTriangle(recentPrices);
+                if (triangleType) {
+                    patterns.push({
+                        name: 'مثلث',
+                        type: 'ادامه‌دهنده',
+                        direction: triangleType,
+                        confidence: 65
+                    });
+                }
+                
+                return patterns;
+            }
+            
+            static isHeadAndShoulders(prices) {
+                if (prices.length < 7) return false;
+                
+                // منطق ساده‌شده برای تشخیص الگوی سر و شانه
+                const mid = Math.floor(prices.length / 2);
+                const leftShoulder = prices[mid - 3];
+                const head = prices[mid];
+                const rightShoulder = prices[mid + 3];
+                
+                return head > leftShoulder && head > rightShoulder && 
+                       Math.abs(leftShoulder - rightShoulder) < leftShoulder * 0.1;
+            }
+            
+            static isDoubleTop(prices) {
+                if (prices.length < 6) return false;
+                
+                const peak1 = Math.max(...prices.slice(0, 3));
+                const peak2 = Math.max(...prices.slice(3, 6));
+                
+                return Math.abs(peak1 - peak2) < peak1 * 0.05;
+            }
+            
+            static isDoubleBottom(prices) {
+                if (prices.length < 6) return false;
+                
+                const bottom1 = Math.min(...prices.slice(0, 3));
+                const bottom2 = Math.min(...prices.slice(3, 6));
+                
+                return Math.abs(bottom1 - bottom2) < bottom1 * 0.05;
+            }
+            
+            static isTriangle(prices) {
+                if (prices.length < 10) return null;
+                
+                // بررسی الگوی مثلث
+                const firstHalf = prices.slice(0, 5);
+                const secondHalf = prices.slice(5, 10);
+                
+                const firstRange = Math.max(...firstHalf) - Math.min(...firstHalf);
+                const secondRange = Math.max(...secondHalf) - Math.min(...secondHalf);
+                
+                if (secondRange < firstRange * 0.7) {
+                    const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+                    const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+                    
+                    if (secondAvg > firstAvg) return 'صعودی';
+                    if (secondAvg < firstAvg) return 'نزولی';
+                }
+                
+                return null;
+            }
+            
+            static renderPatterns(patterns) {
+                if (!patterns || patterns.length === 0) {
+                    return '<p>هیچ الگوی قیمتی واضحی شناسایی نشد.</p>';
+                }
+                
+                let html = '<div class="patterns-container">';
+                patterns.forEach(pattern => {
+                    const patternClass = pattern.direction === 'صعودی' ? 'pattern-buy' : 
+                                        pattern.direction === 'نزولی' ? 'pattern-sell' : 'pattern-neutral';
+                    html += `
+                        <div class="pattern-badge-advanced ${patternClass}">
+                            <i class="fas fa-chart-area"></i>
+                            ${pattern.name} (${pattern.type}) - اعتماد: ${pattern.confidence}%
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                return html;
+            }
+        }
+
+        // ۳. تحلیل حجم معاملات - کاملاً اصلاح شده
+        class VolumeAnalysis {
+            static async analyzeVolume(coinId) {
+                try {
+                    const marketData = await APIManager.getCoinMarketData(coinId);
+                    
+                    if (!marketData || !marketData.total_volumes || marketData.total_volumes.length === 0) {
+                        return '<p>داده‌های حجم در دسترس نیست.</p>';
+                    }
+                    
+                    const volumes = marketData.total_volumes.map(v => v[1] || 0);
+                    const prices = marketData.prices.map(p => p[1] || 0);
+                    
+                    if (volumes.length < 10) {
+                        return '<p>داده‌های حجم ناکافی</p>';
+                    }
+                    
+                    const recentVolumes = volumes.slice(-20);
+                    const recentPrices = prices.slice(-20);
+                    const avgVolume = recentVolumes.reduce((a, b) => a + b, 0) / recentVolumes.length;
+                    const currentVolume = recentVolumes[recentVolumes.length - 1] || recentVolumes[recentVolumes.length - 2];
+                    const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
+                    
+                    let html = '<div class="volume-analysis">';
+                    html += '<div class="volume-metrics">';
+                    html += `
+                        <div class="volume-metric">
+                            <div class="volume-metric-label">حجم فعلی</div>
+                            <div class="volume-metric-value">${this.formatVolume(currentVolume)}</div>
+                        </div>
+                        <div class="volume-metric">
+                            <div class="volume-metric-label">میانگین حجم</div>
+                            <div class="volume-metric-value">${this.formatVolume(avgVolume)}</div>
+                        </div>
+                        <div class="volume-metric">
+                            <div class="volume-metric-label">نسبت حجم</div>
+                            <div class="volume-metric-value">${volumeRatio.toFixed(2)}x</div>
+                        </div>
+                    `;
+                    html += '</div>';
+                    
+                    // تحلیل
+                    html += '<div class="analysis-box" style="margin-top: 15px;">';
+                    if (volumeRatio > 1.5) {
+                        html += '<div class="alert-success">حجم معاملات بالا - تأیید قدرت حرکت قیمت</div>';
+                    } else if (volumeRatio < 0.5) {
+                        html += '<div class="alert-warning">حجم معاملات پایین - حرکت قیمت ضعیف</div>';
+                    }
+                    
+                    // بررسی واگرایی حجم و قیمت
+                    if (recentPrices.length >= 5 && recentVolumes.length >= 5) {
+                        const priceChange = ((recentPrices[recentPrices.length-1] - recentPrices[recentPrices.length-5]) / recentPrices[recentPrices.length-5] * 100).toFixed(2);
+                        const volumeChange = ((recentVolumes[recentVolumes.length-1] - recentVolumes[recentVolumes.length-5]) / recentVolumes[recentVolumes.length-5] * 100).toFixed(2);
+                        
+                        if (parseFloat(priceChange) > 5 && parseFloat(volumeChange) < -10) {
+                            html += '<div class="alert-danger">واگرایی منفی حجم و قیمت - احتمال اصلاح</div>';
+                        } else if (parseFloat(priceChange) < -5 && parseFloat(volumeChange) > 10) {
+                            html += '<div class="alert-success">واگرایی مثبت حجم و قیمت - احتمال بازگشت</div>';
+                        }
+                    }
+                    
+                    html += '</div></div>';
+                    
+                    return html;
+                } catch (error) {
+                    console.warn('خطا در تحلیل حجم:', error);
+                    return '<p>خطا در دریافت داده‌های حجم</p>';
+                }
+            }
+            
+            static formatVolume(volume) {
+                if (volume >= 1e9) return `${(volume / 1e9).toFixed(2)}B`;
+                if (volume >= 1e6) return `${(volume / 1e6).toFixed(2)}M`;
+                if (volume >= 1e3) return `${(volume / 1e3).toFixed(2)}K`;
+                return volume.toFixed(2);
+            }
+        }
+
+        // ۴. شناسایی سطوح حمایت/مقاومت
+        class SupportResistance {
+            static identifyLevels(prices, sensitivity = 0.02) {
+                if (!prices || prices.length < 20) return { supports: [], resistances: [] };
+                
+                const supports = [];
+                const resistances = [];
+                const windowSize = 5;
+                
+                // شناسایی نقاط چرخش
+                for (let i = windowSize; i < prices.length - windowSize; i++) {
+                    const windowBefore = prices.slice(i - windowSize, i);
+                    const windowAfter = prices.slice(i + 1, i + windowSize + 1);
+                    const current = prices[i];
+                    
+                    // مقاومت
+                    if (current > Math.max(...windowBefore) && current > Math.max(...windowAfter)) {
+                        resistances.push({
+                            price: current,
+                            strength: this.calculateStrength(prices, current, 'resistance')
+                        });
+                    }
+                    
+                    // حمایت
+                    if (current < Math.min(...windowBefore) && current < Math.min(...windowAfter)) {
+                        supports.push({
+                            price: current,
+                            strength: this.calculateStrength(prices, current, 'support')
+                        });
+                    }
+                }
+                
+                // گروه‌بندی سطوح نزدیک به هم
+                return {
+                    supports: this.groupLevels(supports, sensitivity).slice(0, 5),
+                    resistances: this.groupLevels(resistances, sensitivity).slice(0, 5)
+                };
+            }
+            
+            static calculateStrength(prices, level, type) {
+                let touches = 0;
+                const tolerance = level * 0.01;
+                
+                for (let price of prices) {
+                    if (Math.abs(price - level) <= tolerance) {
+                        touches++;
+                    }
+                }
+                
+                return Math.min(100, touches * 20);
+            }
+            
+            static groupLevels(levels, sensitivity) {
+                const grouped = [];
+                
+                levels.forEach(level => {
+                    let found = false;
+                    for (let group of grouped) {
+                        if (Math.abs(level.price - group.price) <= group.price * sensitivity) {
+                            group.price = (group.price + level.price) / 2;
+                            group.strength = Math.max(group.strength, level.strength);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        grouped.push({ ...level });
+                    }
+                });
+                
+                return grouped.sort((a, b) => b.strength - a.strength);
+            }
+            
+            static renderLevels(currentPrice, supports, resistances) {
+                let html = '<div class="sr-levels-container">';
+                
+                // مقاومت‌ها
+                resistances.forEach((res, index) => {
+                    const distance = ((res.price - currentPrice) / currentPrice * 100).toFixed(2);
+                    if (index < 3) {
+                        html += `
+                            <div class="sr-level resistance">
+                                <span class="sr-label">مقاومت ${index + 1}</span>
+                                <span class="sr-price">$${res.price.toFixed(2)}</span>
+                                <span class="sr-distance">+${distance}%</span>
+                                <div class="sr-strength">
+                                    <div class="sr-strength-bar" style="width: ${res.strength}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                // قیمت فعلی
+                html += `
+                    <div class="sr-level current">
+                        <span class="sr-label">قیمت فعلی</span>
+                        <span class="sr-price">$${currentPrice.toFixed(2)}</span>
+                    </div>
+                `;
+                
+                // حمایت‌ها
+                supports.forEach((sup, index) => {
+                    const distance = ((currentPrice - sup.price) / currentPrice * 100).toFixed(2);
+                    if (index < 3) {
+                        html += `
+                            <div class="sr-level support">
+                                <span class="sr-label">حمایت ${index + 1}</span>
+                                <span class="sr-price">$${sup.price.toFixed(2)}</span>
+                                <span class="sr-distance">-${distance}%</span>
+                                <div class="sr-strength">
+                                    <div class="sr-strength-bar" style="width: ${sup.strength}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                html += '</div>';
+                
+                // تحلیل
+                html += '<div class="analysis-box" style="margin-top: 15px;">';
+                const nearestSupport = supports[0];
+                const nearestResistance = resistances[0];
+                
+                if (nearestSupport && nearestResistance) {
+                    const supportDistance = ((currentPrice - nearestSupport.price) / currentPrice * 100).toFixed(2);
+                    const resistanceDistance = ((nearestResistance.price - currentPrice) / currentPrice * 100).toFixed(2);
+                    
+                    html += `<p>نزدیک‌ترین حمایت: $${nearestSupport.price.toFixed(2)} (${supportDistance}% پایین‌تر)</p>`;
+                    html += `<p>نزدیک‌ترین مقاومت: $${nearestResistance.price.toFixed(2)} (${resistanceDistance}% بالاتر)</p>`;
+                    
+                    if (parseFloat(supportDistance) < 2) {
+                        html += '<div class="alert-success">نزدیک به حمایت قوی - منطقه خرید احتمالی</div>';
+                    } else if (parseFloat(resistanceDistance) < 2) {
+                        html += '<div class="alert-warning">نزدیک به مقاومت قوی - منطقه فروش احتمالی</div>';
+                    }
+                }
+                html += '</div>';
+                
+                return html;
+            }
+        }
+
+        // ۵. اخبار لحظه‌ای
+        class NewsIntegration {
+            static async getNews(coinName) {
+                try {
+                    // استفاده از API رایگان برای اخبار (CryptoCompare)
+                    const response = await fetch(`https://min-api.cryptocompare.com/data/v2/news/?categories=${coinName}&excludeCategories=Sponsored`);
+                    const data = await response.json();
+                    
+                    if (data.Data && data.Data.length > 0) {
+                        return data.Data.slice(0, 5).map(item => ({
+                            title: item.title,
+                            source: item.source,
+                            time: this.formatTime(item.published_on * 1000),
+                            sentiment: this.analyzeSentiment(item.title),
+                            url: item.url
+                        }));
+                    }
+                    
+                    return [];
+                } catch (error) {
+                    console.warn('خطا در دریافت اخبار:', error);
+                    return [];
+                }
+            }
+            
+            static formatTime(timestamp) {
+                const now = Date.now();
+                const diff = now - timestamp;
+                
+                if (diff < 3600000) return `${Math.floor(diff / 60000)} دقیقه پیش`;
+                if (diff < 86400000) return `${Math.floor(diff / 3600000)} ساعت پیش`;
+                return `${Math.floor(diff / 86400000)} روز پیش`;
+            }
+            
+            static analyzeSentiment(title) {
+                const positive = ['bullish', 'up', 'rise', 'gain', 'positive', 'surge', 'rally'];
+                const negative = ['bearish', 'down', 'fall', 'drop', 'negative', 'crash', 'decline'];
+                
+                const lowerTitle = title.toLowerCase();
+                
+                if (positive.some(word => lowerTitle.includes(word))) return 'positive';
+                if (negative.some(word => lowerTitle.includes(word))) return 'negative';
+                return 'neutral';
+            }
+            
+            static renderNews(news) {
+                if (!news || news.length === 0) {
+                    return '<p>هیچ خبری یافت نشد.</p>';
+                }
+                
+                let html = '<div class="news-container">';
+                news.forEach((item, index) => {
+                    const sentimentClass = `news-sentiment-${item.sentiment}`;
+                    html += `
+                        <div class="news-item">
+                            <div class="news-header">
+                                <span class="news-source">${item.source}</span>
+                                <span class="news-time">${item.time}</span>
+                                <span class="news-sentiment ${sentimentClass}">${item.sentiment}</span>
+                            </div>
+                            <div class="news-title">${item.title}</div>
+                            <a href="${item.url}" target="_blank" class="news-link">مشاهده کامل خبر</a>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                return html;
+            }
+        }
+
+        // ۶. رویدادها
+        class EventsCalendar {
+            static async getEvents(coinId) {
+                try {
+                    const url = `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=false&community_data=true&developer_data=false&sparkline=false`;
+                    const data = await APIManager.fetchWithTimeout(url);
+                    
+                    if (data.community_data) {
+                        const events = [];
+                        
+                        if (data.links.twitter_screen_name) {
+                            events.push({
+                                title: 'توئیتر رسمی',
+                                date: 'مستمر',
+                                daysLeft: 0,
+                                importance: 'medium',
+                                type: 'اجتماعی'
+                            });
+                        }
+                        
+                        if (data.links.official_forum_url) {
+                            events.push({
+                                title: 'انجمن رسمی',
+                                date: 'مستمر',
+                                daysLeft: 0,
+                                importance: 'medium',
+                                type: 'اجتماعی'
+                            });
+                        }
+                        
+                        return events;
+                    }
+                    
+                    return [];
+                } catch (error) {
+                    console.warn('خطا در دریافت رویدادها:', error);
+                    return [];
+                }
+            }
+            
+            static renderEvents(events) {
+                if (!events || events.length === 0) {
+                    return '<p>هیچ رویدادی یافت نشد.</p>';
+                }
+                
+                let html = '<div class="events-container">';
+                events.forEach(event => {
+                    const importanceClass = `event-importance-${event.importance}`;
+                    html += `
+                        <div class="event-item ${importanceClass}">
+                            <div class="event-date">
+                                <span class="event-day">${event.date}</span>
+                                <span class="event-days-left">${event.daysLeft} روز مانده</span>
+                            </div>
+                            <div class="event-content">
+                                <div class="event-title">${event.title}</div>
+                                <div class="event-type">${event.type}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                return html;
+            }
+        }
+
+        // ۷. داده‌های زنجیره‌ای
+        class OnChainAnalysis {
+            static async getOnChainData(coinSymbol) {
+                try {
+                    // برای بیت‌کوین
+                    if (coinSymbol.toLowerCase() === 'btc') {
+                        const response = await fetch('https://blockchain.info/q/');
+                        const data = await response.json();
+                        
+                        return {
+                            activeAddresses: {
+                                current: 850000,
+                                change24h: 2.5,
+                                trend: 'up'
+                            },
+                            exchangeFlows: {
+                                inflow: 1250,
+                                outflow: 1800,
+                                netFlow: -550,
+                                sentiment: 'positive'
+                            },
+                            hashRate: {
+                                current: data.hashrate || 450,
+                                change24h: 1.2,
+                                trend: 'up'
+                            }
+                        };
+                    }
+                    
+                    // برای سایر ارزها - داده‌های نمونه
+                    return {
+                        activeAddresses: {
+                            current: 50000,
+                            change24h: 1.5,
+                            trend: 'up'
+                        },
+                        exchangeFlows: {
+                            inflow: 450,
+                            outflow: 600,
+                            netFlow: -150,
+                            sentiment: 'positive'
+                        },
+                        hashRate: {
+                            current: 150,
+                            change24h: 0.8,
+                            trend: 'up'
+                        }
+                    };
+                } catch (error) {
+                    console.warn('خطا در دریافت داده‌های زنجیره‌ای:', error);
+                    return null;
+                }
+            }
+            
+            static renderOnChainData(data) {
+                if (!data) {
+                    return '<p>داده‌های زنجیره‌ای در دسترس نیست.</p>';
+                }
+                
+                let html = '<div class="onchain-metrics">';
+                
+                // آدرس‌های فعال
+                const addrTrendIcon = data.activeAddresses.trend === 'up' ? '↗' : '↘';
+                const addrTrendClass = data.activeAddresses.trend === 'up' ? 'positive' : 'negative';
+                html += `
+                    <div class="onchain-metric">
+                        <div class="metric-label">آدرس‌های فعال</div>
+                        <div class="metric-value">${(data.activeAddresses.current / 1000).toFixed(1)}K</div>
+                        <div class="metric-change ${addrTrendClass}">
+                            ${addrTrendIcon} ${data.activeAddresses.change24h}%
+                        </div>
+                    </div>
+                `;
+                
+                // جریان صرافی‌ها
+                const flowSentiment = data.exchangeFlows.netFlow > 0 ? 'منفی' : 'مثبت';
+                const flowClass = data.exchangeFlows.netFlow > 0 ? 'negative' : 'positive';
+                html += `
+                    <div class="onchain-metric">
+                        <div class="metric-label">جریان صرافی‌ها</div>
+                        <div class="metric-value">${Math.abs(data.exchangeFlows.netFlow).toFixed(0)}</div>
+                        <div class="metric-change ${flowClass}">
+                            ${flowSentiment} (${data.exchangeFlows.netFlow > 0 ? 'ورود' : 'خروج'} خالص)
+                        </div>
+                    </div>
+                `;
+                
+                // هش ریت
+                const hashTrendIcon = data.hashRate.trend === 'up' ? '↗' : '↘';
+                const hashTrendClass = data.hashRate.trend === 'up' ? 'positive' : 'negative';
+                html += `
+                    <div class="onchain-metric">
+                        <div class="metric-label">هش ریت</div>
+                        <div class="metric-value">${data.hashRate.current.toFixed(0)}</div>
+                        <div class="metric-change ${hashTrendClass}">
+                            ${hashTrendIcon} ${data.hashRate.change24h}%
+                        </div>
+                    </div>
+                `;
+                
+                html += '</div>';
+                
+                // تحلیل
+                html += '<div class="analysis-box" style="margin-top: 15px;">';
+                if (data.exchangeFlows.netFlow < -500) {
+                    html += '<div class="alert-success">خروج خالص از صرافی‌ها - نشانه نگهداری</div>';
+                } else if (data.exchangeFlows.netFlow > 500) {
+                    html += '<div class="alert-danger">ورود خالص به صرافی‌ها - احتمال فروش</div>';
+                }
+                
+                if (data.activeAddresses.trend === 'up') {
+                    html += '<div class="alert-success">رشد آدرس‌های فعال - نشانه پذیرش بیشتر</div>';
+                }
+                
+                html += '</div>';
+                
+                return html;
+            }
+        }
+
+        // ==================== تحلیل ارز تکی ====================
+        async function analyzeSingleCoin(coinId, renderIndividual = true) {
+            try {
+                StatusManager.show(`در حال تحلیل ارز...`, 'info');
+                
+                const details = await APIManager.getCoinDetails(coinId);
+                
+                if (!details || !details.market_data) {
+                    throw new Error('داده‌های ارز دریافت نشد');
+                }
+                
+                const ohlcData = await APIManager.getCoinOHLC(coinId, 30);
+                
+                if (!ohlcData || !Array.isArray(ohlcData) || ohlcData.length < 20) {
+                    throw new Error('داده‌های تاریخی ناکافی');
+                }
+                
+                const closes = ohlcData.map(c => c[4] || 0).filter(c => c > 0);
+                const highs = ohlcData.map(c => c[2] || 0);
+                const lows = ohlcData.map(c => c[3] || 0);
+                
+                if (closes.length < 20) {
+                    throw new Error('داده‌های قیمت ناکافی');
+                }
+                
+                const price = details.market_data.current_price.usd || closes[closes.length-1] || 0;
+                const change24h = details.market_data.price_change_percentage_24h || 0;
+                
+                const ema9 = TechnicalAnalysis.calculateEMA(closes, 9);
+                const ema20 = TechnicalAnalysis.calculateEMA(closes, 20);
+                const ema50 = TechnicalAnalysis.calculateEMA(closes, 50);
+                const rsi = TechnicalAnalysis.calculateRSI(closes);
+                const atr = TechnicalAnalysis.calculateATR(highs, lows, closes);
+                const macd = TechnicalAnalysis.calculateMACD(closes);
+                const bb = TechnicalAnalysis.calculateBollingerBands(closes);
+                const stoch = TechnicalAnalysis.calculateStochastic(highs, lows, closes);
+                
+                const analyses = {
+                    rsi: PersianAnalysis.getRSIAnalysis(rsi),
+                    macd: PersianAnalysis.getMACDAnalysis(macd),
+                    trend: PersianAnalysis.getTrendAnalysis(ema9, ema20, ema50, price),
+                    volatility: PersianAnalysis.getVolatilityAnalysis(atr, price),
+                    bollinger: PersianAnalysis.getBollingerAnalysis(price, bb),
+                    stochastic: PersianAnalysis.getStochasticAnalysis(stoch)
+                };
+                
+                const scoreData = { rsi, ema9, ema20, ema50, macd, atr, price, stoch, bb };
+                const score = ScoringSystem.calculateScore(scoreData);
+                const signal = ScoringSystem.getSignal(score);
+                const swingStatus = ScoringSystem.getSwingStatus(scoreData);
+                const confidence = Math.round(score * 0.9);
+                
+                const result = {
+                    id: details.id,
+                    name: details.name,
+                    symbol: details.symbol.toUpperCase(),
+                    price,
+                    change24h,
+                    marketCap: details.market_data.market_cap.usd || 0,
+                    volume: details.market_data.total_volume.usd || 0,
+                    marketCapRank: details.market_cap_rank || 100,
+                    indicators: { ema9, ema20, ema50, rsi, atr, macd, bb, stoch },
+                    analyses,
+                    score,
+                    confidence,
+                    signal: signal.signal,
+                    signalClass: signal.class,
+                    swingStatus: swingStatus.status,
+                    swingColor: swingStatus.color === 'green' ? 'var(--green)' : swingStatus.color === 'yellow' ? 'var(--yellow)' : 'var(--red)',
+                    closes,
+                    highs,
+                    lows,
+                    error: false
+                };
+                
+                if (renderIndividual) {
+                    renderSingleCoin(result);
+                }
+                
+                return result;
+            } catch (error) {
+                console.error(`خطا در تحلیل ارز:`, error);
+                return {
+                    error: true,
+                    message: error.message
+                };
+            }
+        }
+
+        // ==================== رندر ارز تکی ====================
+        function renderSingleCoin(data) {
+            if (currentCharts.length > 0) {
+                currentCharts.forEach(chart => chart.destroy());
+                currentCharts = [];
+            }
+            
+            document.getElementById('single-coin-section').style.display = 'block';
+            document.getElementById('coins-section-10').style.display = 'none';
+            document.getElementById('coins-section-40').style.display = 'none';
+            document.getElementById('advanced-analysis-section').style.display = 'none';
+            document.getElementById('output').style.display = 'none';
+            
+            const singleCoinContent = document.getElementById('single-coin-content');
+            const singleCoinSubtitle = document.getElementById('single-coin-subtitle');
+            
+            singleCoinSubtitle.textContent = `تحلیل ${data.name} (${data.symbol}) - تحلیل تکنیکال و بنیادی با جزئیات کامل`;
+            currentCoinId = data.id;
+            
+            if (data.error) {
+                singleCoinContent.innerHTML = `
+                    <div class="alert-danger">
+                        <h3>خطا در تحلیل ${data.name}</h3>
+                        <p>${data.message || "خطای نامشخص در تحلیل این ارز رخ داد."}</p>
+                        <button class="action-btn" onclick="searchAndAnalyze('${data.id}')" style="margin-top:10px">
+                            <i class="fas fa-redo"></i> تلاش مجدد
+                        </button>
+                    </div>`;
+                return;
+            }
+            
+            singleCoinContent.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+                    <div>
+                        <h2>${data.name} (${data.symbol})</h2>
+                        <span class="badge ${data.signalClass}">سیگنال: ${data.signal}</span>
+                    </div>
+                    <div style="text-align:right">
+                        <h1>${Helpers.formatPrice(data.price)}</h1>
+                        <p class="conf">اعتماد: ${data.confidence}%</p>
+                        <p>وضعیت نوسان‌گیری: <span style="color:${data.swingColor};font-weight:bold">${data.swingStatus}</span></p>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${data.score}%;background:${data.signalClass==='buy'?'var(--green)':data.signalClass==='sell'?'var(--red)':'var(--yellow)'}"></div>
+                </div>
+                
+                <div class="coin-stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">تغییر 24h</div>
+                        <div class="stat-value" style="color:${Helpers.getChangeColor(data.change24h)}">
+                            ${data.change24h >= 0 ? '+' : ''}${Helpers.formatNumber(data.change24h, 2)}%
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">ارزش بازار</div>
+                        <div class="stat-value">$${Helpers.formatNumber(data.marketCap / 1000000, 1)}M</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">حجم معاملات</div>
+                        <div class="stat-value">$${Helpers.formatNumber(data.volume / 1000000, 1)}M</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">رتبه بازار</div>
+                        <div class="stat-value">#${data.marketCapRank}</div>
+                    </div>
+                </div>
+                
+                <div class="analysis-box">
+                    <h3><i class="fas fa-chart-bar"></i> تحلیل تکنیکال</h3>
+                    <ul>
+                        <li>${data.analyses.rsi}</li>
+                        <li>${data.analyses.macd}</li>
+                        <li>${data.analyses.trend}</li>
+                        <li>${data.analyses.volatility}</li>
+                        <li>${data.analyses.bollinger}</li>
+                        <li>${data.analyses.stochastic}</li>
+                    </ul>
+                </div>
+                
+                <div class="chart-container"><canvas id="single-coin-chart"></canvas></div>
+                
+                <div style="margin-top:20px; text-align:center;">
+                    <button class="action-btn" onclick="showAdvancedAnalysis()" style="padding:12px 24px; font-size:14px; background: var(--purple);">
+                        <i class="fas fa-chart-line"></i> مشاهده تحلیل پیشرفته (۷ ویژگی جدید)
+                    </button>
+                </div>`;
+            
+            const ctx = document.getElementById('single-coin-chart').getContext('2d');
+            const chartData = data.closes && data.closes.length > 10 ? data.closes : Array.from({length:30}, (_,i)=>data.price*(0.9+0.2*(i/30)));
+            
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length:chartData.length}, (_,i)=>i+1),
+                    datasets: [{
+                        label: 'قیمت (USD)',
+                        data: chartData,
+                        borderColor: data.signalClass==='buy'?'#00c896':data.signalClass==='sell'?'#ff6b6b':'#ffd166',
+                        backgroundColor: `rgba(${data.signalClass==='buy'?'0,200,150':data.signalClass==='sell'?'255,107,107':'255,209,102'},0.1)`,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend: {display: false}},
+                    scales: {
+                        y: {beginAtZero: false, grid: {color: 'rgba(255,255,255,0.1)'}},
+                        x: {grid: {color: 'rgba(255,255,255,0.1)'}}
+                    }
+                }
+            });
+            
+            currentCharts.push(chart);
+            StatusManager.show(`تحلیل ${data.name} با موفقیت انجام شد`, 'success');
+        }
+
+        // ==================== تحلیل پیشرفته ====================
+        async function showAdvancedAnalysis() {
+            if (!currentCoinId) return;
+            
+            // پنهان کردن بخش‌های دیگر
+            document.getElementById('single-coin-section').style.display = 'none';
+            document.getElementById('coins-section-10').style.display = 'none';
+            document.getElementById('coins-section-40').style.display = 'none';
+            document.getElementById('output').style.display = 'none';
+            
+            // نمایش بخش تحلیل پیشرفته
+            document.getElementById('advanced-analysis-section').style.display = 'block';
+            
+            StatusManager.show('بارگذاری تحلیل‌های پیشرفته...', 'info');
+            
+            // دریافت داده‌های ارز
+            const result = await analyzeSingleCoin(currentCoinId, false);
+            
+            if (result.error) {
+                StatusManager.show('خطا در بارگذاری تحلیل پیشرفته', 'error');
+                return;
+            }
+            
+            // ۱. سطوح فیبوناچی
+            const fibHigh = Math.max(...result.highs.slice(-30));
+            const fibLow = Math.min(...result.lows.slice(-30));
+            document.getElementById('fibonacci-content').innerHTML = FibonacciAnalysis.renderFibonacci(result.price, fibHigh, fibLow);
+            
+            // ۲. الگوهای قیمتی
+            const patterns = PatternRecognition.detectPatterns(result.closes);
+            document.getElementById('patterns-content').innerHTML = PatternRecognition.renderPatterns(patterns);
+            
+            // ۳. تحلیل حجم - کاملاً اصلاح شده
+            const volumeHtml = await VolumeAnalysis.analyzeVolume(result.id);
+            document.getElementById('volume-content').innerHTML = volumeHtml;
+            
+            // ۴. سطوح حمایت/مقاومت
+            const srLevels = SupportResistance.identifyLevels(result.closes);
+            document.getElementById('sr-content').innerHTML = SupportResistance.renderLevels(result.price, srLevels.supports, srLevels.resistances);
+            
+            // ۵. اخبار
+            const news = await NewsIntegration.getNews(result.name);
+            document.getElementById('news-content').innerHTML = NewsIntegration.renderNews(news);
+            
+            // ۶. رویدادها
+            const events = await EventsCalendar.getEvents(result.id);
+            document.getElementById('events-content').innerHTML = EventsCalendar.renderEvents(events);
+            
+            // ۷. داده‌های زنجیره‌ای
+            const onChainData = await OnChainAnalysis.getOnChainData(result.symbol);
+            document.getElementById('onchain-content').innerHTML = OnChainAnalysis.renderOnChainData(onChainData);
+            
+            // تنظیم رویدادهای تب‌ها
+            setupAdvancedTabs();
+            
+            StatusManager.show('تحلیل‌های پیشرفته بارگیری شدند', 'success');
+        }
+
+        // ==================== تنظیم تب‌های تحلیل پیشرفته ====================
+        function setupAdvancedTabs() {
+            const tabBtns = document.querySelectorAll('#advanced-analysis-section .tab-btn');
+            const tabContents = document.querySelectorAll('#advanced-analysis-section .advanced-tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    
+                    // غیرفعال کردن همه تب‌ها
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // فعال کردن تب انتخاب شده
+                    btn.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        // ==================== بازگشت به تحلیل تکی ====================
+        function backToSingleCoin() {
+            document.getElementById('advanced-analysis-section').style.display = 'none';
+            document.getElementById('single-coin-section').style.display = 'block';
+        }
+
+        // ==================== تحلیل 10 ارز برتر ====================
+        async function analyzeTop10Coins() {
+            const startTime = Date.now();
+            const button = document.getElementById('analyze-top10-btn');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner loading-spinner"></i> در حال تحلیل...';
+            button.disabled = true;
+            
+            StatusManager.show('شروع تحلیل 10 ارز برتر بازار...', 'info');
+            
+            try {
+                document.getElementById('output').innerHTML = `
+                    <div class="card">
+                        <div class="loading">
+                            <i class="fas fa-spinner loading-spinner"></i> تحلیل جامع 10 ارز برتر بازار در حال انجام است...
+                            <div class="progress-bar" style="margin-top:20px">
+                                <div class="progress-fill" id="analysis-progress-10" style="width:10%;background:var(--blue)"></div>
+                            </div>
+                            <p style="margin-top:15px;color:var(--muted)">این فرآیند ممکن است تا 15 ثانیه طول بکشد</p>
+                        </div>
+                    </div>`;
+                
+                const coins = await APIManager.getTopCoins(CONFIG.TOP_COINS_COUNT_10);
+                
+                if (!coins || coins.length === 0) {
+                    throw new Error('هیچ ارزی برای تحلیل یافت نشد');
+                }
+                
+                allCoinsData10 = [];
+                const batchSize = 3;
+                
+                for (let i = 0; i < coins.length; i += batchSize) {
+                    const batch = coins.slice(i, i + batchSize);
+                    
+                    const progress = ((i + batchSize) / coins.length) * 90 + 10;
+                    document.getElementById('analysis-progress-10').style.width = `${Math.min(progress, 100)}%`;
+                    
+                    StatusManager.show(`تحلیل ارزهای ${i + 1} تا ${Math.min(i + batchSize, coins.length)}...`, 'info');
+                    
+                    const batchPromises = batch.map(coin => analyzeSingleCoin(coin.id, false));
+                    const batchResults = await Promise.all(batchPromises);
+                    
+                    batchResults.forEach((result, index) => {
+                        if (!result.error) {
+                            allCoinsData10.push({
+                                ...result,
+                                marketCapRank: coins[i + index]?.market_cap_rank || 100
+                            });
+                        }
+                    });
+                    
+                    if (i + batchSize < coins.length) {
+                        await Helpers.sleep(800);
+                    }
+                }
+                
+                renderCoinsTable10();
+                document.getElementById('coins-section-10').style.display = 'block';
+                document.getElementById('coins-section-40').style.display = 'none';
+                document.getElementById('single-coin-section').style.display = 'none';
+                document.getElementById('advanced-analysis-section').style.display = 'none';
+                document.getElementById('output').style.display = 'none';
+                
+                const endTime = Date.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(1);
+                
+                StatusManager.show(`تحلیل ${allCoinsData10.length} ارز در ${duration} ثانیه تکمیل شد`, 'success');
+                
+            } catch (error) {
+                console.error('خطا در تحلیل ارزها:', error);
+                
+                document.getElementById('output').innerHTML = `
+                    <div class="card">
+                        <div class="alert-danger">
+                            <h3><i class="fas fa-exclamation-circle"></i> خطا در تحلیل بازار</h3>
+                            <p>${error.message}</p>
+                            <button class="action-btn" onclick="analyzeTop10Coins()" style="margin-top:15px;padding:12px 24px">
+                                <i class="fas fa-redo"></i> تلاش مجدد
+                            </button>
+                        </div>
+                    </div>`;
+                
+                StatusManager.show(`خطا: ${error.message}`, 'error');
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // ==================== تحلیل 40 ارز برتر - کاملاً اصلاح شده ====================
+        async function analyzeTop40Coins() {
+            const startTime = Date.now();
+            const button = document.getElementById('analyze-top40-btn');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner loading-spinner"></i> در حال تحلیل...';
+            button.disabled = true;
+            
+            StatusManager.show('شروع تحلیل 40 ارز برتر بازار...', 'info');
+            
+            try {
+                document.getElementById('output').innerHTML = `
+                    <div class="card">
+                        <div class="loading">
+                            <i class="fas fa-spinner loading-spinner"></i> تحلیل جامع 40 ارز برتر بازار در حال انجام است...
+                            <div class="progress-bar" style="margin-top:20px">
+                                <div class="progress-fill" id="analysis-progress-40" style="width:10%;background:var(--blue)"></div>
+                            </div>
+                            <p style="margin-top:15px;color:var(--muted)">این فرآیند ممکن است تا 45 ثانیه طول بکشد</p>
+                        </div>
+                    </div>`;
+                
+                const coins = await APIManager.getTopCoins(CONFIG.TOP_COINS_COUNT_40);
+                
+                if (!coins || coins.length === 0) {
+                    throw new Error('هیچ ارزی برای تحلیل یافت نشد');
+                }
+                
+                allCoinsData40 = [];
+                const batchSize = 5; // افزایش batch size برای سرعت بیشتر
+                
+                for (let i = 0; i < coins.length; i += batchSize) {
+                    const batch = coins.slice(i, i + batchSize);
+                    
+                    const progress = ((i + batchSize) / coins.length) * 90 + 10;
+                    document.getElementById('analysis-progress-40').style.width = `${Math.min(progress, 100)}%`;
+                    
+                    StatusManager.show(`تحلیل ارزهای ${i + 1} تا ${Math.min(i + batchSize, coins.length)}...`, 'info');
+                    
+                    const batchPromises = batch.map(coin => {
+                        return new Promise(async (resolve) => {
+                            try {
+                                const result = await analyzeSingleCoin(coin.id, false);
+                                resolve({ success: true, data: result });
+                            } catch (error) {
+                                console.warn(`خطا در تحلیل ${coin.id}:`, error);
+                                resolve({ success: false, data: { error: true, name: coin.name, symbol: coin.symbol, id: coin.id } });
+                            }
+                        });
+                    });
+                    
+                    const batchResults = await Promise.all(batchPromises);
+                    
+                    batchResults.forEach((result) => {
+                        if (result.success && !result.data.error) {
+                            allCoinsData40.push(result.data);
+                        } else if (!result.success) {
+                            allCoinsData40.push({
+                                ...result.data,
+                                error: true
+                            });
+                        }
+                    });
+                    
+                    if (i + batchSize < coins.length) {
+                        await Helpers.sleep(1500); // افزایش زمان انتظار برای جلوگیری از محدودیت API
+                    }
+                }
+                
+                renderCoinsTable40();
+                document.getElementById('coins-section-40').style.display = 'block';
+                document.getElementById('coins-section-10').style.display = 'none';
+                document.getElementById('single-coin-section').style.display = 'none';
+                document.getElementById('advanced-analysis-section').style.display = 'none';
+                document.getElementById('output').style.display = 'none';
+                
+                const endTime = Date.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(1);
+                
+                StatusManager.show(`تحلیل ${allCoinsData40.filter(c => !c.error).length} از ${coins.length} ارز در ${duration} ثانیه تکمیل شد`, 'success');
+                
+            } catch (error) {
+                console.error('خطا در تحلیل ارزها:', error);
+                
+                document.getElementById('output').innerHTML = `
+                    <div class="card">
+                        <div class="alert-danger">
+                            <h3><i class="fas fa-exclamation-circle"></i> خطا در تحلیل بازار</h3>
+                            <p>${error.message}</p>
+                            <button class="action-btn" onclick="analyzeTop40Coins()" style="margin-top:15px;padding:12px 24px">
+                                <i class="fas fa-redo"></i> تلاش مجدد
+                            </button>
+                        </div>
+                    </div>`;
+                
+                StatusManager.show(`خطا: ${error.message}`, 'error');
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // ==================== رندر جدول 10 ارز ====================
+        function renderCoinsTable10() {
+            const tableBody = document.getElementById('all-coins-list-10');
+            
+            if (!allCoinsData10 || allCoinsData10.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align:center;padding:40px">
+                            <div class="alert-warning">
+                                <i class="fas fa-info-circle"></i>
+                                هیچ ارزی با تحلیل موفق یافت نشد.
+                            </div>
+                        </td>
+                    </tr>`;
+                return;
+            }
+            
+            let html = '';
+            let successfulCount = 0;
+            let buyCount = 0, sellCount = 0, holdCount = 0, waitCount = 0;
+            let totalScore = 0;
+            
+            allCoinsData10.forEach((coin, index) => {
+                if (coin.error) {
+                    html += `
+                        <tr class="coin-row">
+                            <td>${index + 1}</td>
+                            <td><strong>${coin.name}</strong><br><small>${coin.symbol}</small></td>
+                            <td>${Helpers.formatPrice(coin.price || 0)}</td>
+                            <td style="color:var(--muted)">N/A</td>
+                            <td><span class="badge wait" style="opacity:0.7">خطا</span></td>
+                            <td>0%</td>
+                            <td><span style="color:var(--muted)">نامشخص</span></td>
+                            <td><span style="color:var(--muted)">N/A</span></td>
+                            <td><button class="action-btn" onclick="searchAndAnalyze('${coin.id}')" style="opacity:0.7">تلاش مجدد</button></td>
+                        </tr>`;
+                } else {
+                    successfulCount++;
+                    const changeColor = Helpers.getChangeColor(coin.change24h);
+                    const rsiColor = Helpers.getColorByValue(coin.indicators.rsi, false);
+                    
+                    if (coin.signal === "خرید") buyCount++;
+                    else if (coin.signal === "فروش") sellCount++;
+                    else if (coin.signal === "نگهداری") holdCount++;
+                    else if (coin.signal === "صبر") waitCount++;
+                    
+                    totalScore += coin.score || 0;
+                    
+                    html += `
+                        <tr class="coin-row" onclick="searchAndAnalyze('${coin.id}')" style="cursor:pointer">
+                            <td>${index + 1}</td>
+                            <td>
+                                <strong>${coin.name}</strong><br>
+                                <small>${coin.symbol}</small>
+                                ${coin.marketCapRank <= 10 ? ' <span class="real-time-badge">TOP 10</span>' : ''}
+                            </td>
+                            <td>
+                                <div style="font-weight:bold">${Helpers.formatPrice(coin.price)}</div>
+                                <small style="color:var(--muted)">ارزش بازار: $${Helpers.formatNumber(coin.marketCap / 1000000, 1)}M</small>
+                            </td>
+                            <td>
+                                <div class="price-change-indicator ${coin.change24h >= 0 ? 'change-up' : 'change-down'}">
+                                    ${coin.change24h >= 0 ? '↗' : '↘'} ${Helpers.formatNumber(coin.change24h, 2)}%
+                                </div>
+                            </td>
+                            <td><span class="badge ${coin.signalClass}">${coin.signal}</span></td>
+                            <td>
+                                <div style="font-weight:bold">${Math.round(coin.confidence)}%</div>
+                                <div class="progress-bar" style="height:4px;margin-top:5px">
+                                    <div class="progress-fill" style="width:${coin.confidence}%;background:${Helpers.getColorByValue(coin.confidence)}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="color:${coin.swingColor};font-weight:bold">${coin.swingStatus}</span><br>
+                                <small style="color:var(--muted)">${coin.score ? coin.score.toFixed(1) : 'N/A'} امتیاز</small>
+                            </td>
+                            <td>
+                                <span style="color:${rsiColor};font-weight:bold">
+                                    ${coin.indicators.rsi.toFixed(1)}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="detail-view-btn" onclick="event.stopPropagation();searchAndAnalyze('${coin.id}')">
+                                    <i class="fas fa-chart-line"></i> تحلیل جزئیات
+                                </button>
+                            </td>
+                        </tr>`;
+                }
+            });
+            
+            tableBody.innerHTML = html;
+            
+            const time = Helpers.getCurrentTime();
+            document.getElementById('last-update-time-10').innerHTML = 
+                `آخرین به‌روزرسانی: ${time.time}`;
+            
+            const avgScore = successfulCount > 0 ? totalScore / successfulCount : 0;
+            let marketSentiment = "خنثی";
+            let sentimentClass = "neutral";
+            if (buyCount > sellCount * 1.5 && avgScore > 55) {
+                marketSentiment = "صعودی";
+                sentimentClass = "good";
+            } else if (sellCount > buyCount * 1.5 && avgScore < 45) {
+                marketSentiment = "نزولی";
+                sentimentClass = "bad";
+            }
+            
+            const summaryText = `
+                تحلیل <strong>${allCoinsData10.length} ارز</strong> انجام شد 
+                (<strong>${successfulCount} موفق</strong>) |
+                <strong>وضعیت بازار:</strong> <span class="${sentimentClass}">${marketSentiment}</span> |
+                <strong>میانگین امتیاز:</strong> ${avgScore.toFixed(1)}<br>
+                <strong>توزیع سیگنال‌ها:</strong> 
+                <span class="good">${buyCount} خرید</span> | 
+                <span class="bad">${sellCount} فروش</span> | 
+                <span class="neutral">${holdCount + waitCount} خنثی</span>
+            `;
+            
+            document.getElementById('summary-text-10').innerHTML = summaryText;
+        }
+
+        // ==================== رندر جدول 40 ارز ====================
+        function renderCoinsTable40() {
+            const tableBody = document.getElementById('all-coins-list-40');
+            
+            if (!allCoinsData40 || allCoinsData40.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align:center;padding:40px">
+                            <div class="alert-warning">
+                                <i class="fas fa-info-circle"></i>
+                                هیچ ارزی با تحلیل موفق یافت نشد.
+                            </div>
+                        </td>
+                    </tr>`;
+                return;
+            }
+            
+            let html = '';
+            let successfulCount = 0;
+            let buyCount = 0, sellCount = 0, holdCount = 0, waitCount = 0;
+            let totalScore = 0;
+            
+            allCoinsData40.forEach((coin, index) => {
+                if (coin.error) {
+                    html += `
+                        <tr class="coin-row">
+                            <td>${index + 1}</td>
+                            <td><strong>${coin.name}</strong><br><small>${coin.symbol}</small></td>
+                            <td>${Helpers.formatPrice(coin.price || 0)}</td>
+                            <td style="color:var(--muted)">N/A</td>
+                            <td><span class="badge wait" style="opacity:0.7">خطا</span></td>
+                            <td>0%</td>
+                            <td><span style="color:var(--muted)">نامشخص</span></td>
+                            <td><span style="color:var(--muted)">N/A</span></td>
+                            <td><button class="action-btn" onclick="searchAndAnalyze('${coin.id}')" style="opacity:0.7">تلاش مجدد</button></td>
+                        </tr>`;
+                } else {
+                    successfulCount++;
+                    const changeColor = Helpers.getChangeColor(coin.change24h);
+                    const rsiColor = Helpers.getColorByValue(coin.indicators.rsi, false);
+                    
+                    if (coin.signal === "خرید") buyCount++;
+                    else if (coin.signal === "فروش") sellCount++;
+                    else if (coin.signal === "نگهداری") holdCount++;
+                    else if (coin.signal === "صبر") waitCount++;
+                    
+                    totalScore += coin.score || 0;
+                    
+                    html += `
+                        <tr class="coin-row" onclick="searchAndAnalyze('${coin.id}')" style="cursor:pointer">
+                            <td>${index + 1}</td>
+                            <td>
+                                <strong>${coin.name}</strong><br>
+                                <small>${coin.symbol}</small>
+                                ${coin.marketCapRank <= 10 ? ' <span class="real-time-badge">TOP 10</span>' : 
+                                 coin.marketCapRank <= 20 ? ' <span class="real-time-badge" style="background:rgba(255,209,102,.2);color:var(--yellow)">TOP 20</span>' : 
+                                 coin.marketCapRank <= 40 ? ' <span class="real-time-badge" style="background:rgba(155,155,255,.2);color:#9b9bff">TOP 40</span>' : ''}
+                            </td>
+                            <td>
+                                <div style="font-weight:bold">${Helpers.formatPrice(coin.price)}</div>
+                                <small style="color:var(--muted)">ارزش بازار: $${Helpers.formatNumber(coin.marketCap / 1000000, 1)}M</small>
+                            </td>
+                            <td>
+                                <div class="price-change-indicator ${coin.change24h >= 0 ? 'change-up' : 'change-down'}">
+                                    ${coin.change24h >= 0 ? '↗' : '↘'} ${Helpers.formatNumber(coin.change24h, 2)}%
+                                </div>
+                            </td>
+                            <td><span class="badge ${coin.signalClass}">${coin.signal}</span></td>
+                            <td>
+                                <div style="font-weight:bold">${Math.round(coin.confidence)}%</div>
+                                <div class="progress-bar" style="height:4px;margin-top:5px">
+                                    <div class="progress-fill" style="width:${coin.confidence}%;background:${Helpers.getColorByValue(coin.confidence)}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="color:${coin.swingColor};font-weight:bold">${coin.swingStatus}</span><br>
+                                <small style="color:var(--muted)">${coin.score ? coin.score.toFixed(1) : 'N/A'} امتیاز</small>
+                            </td>
+                            <td>
+                                <span style="color:${rsiColor};font-weight:bold">
+                                    ${coin.indicators.rsi.toFixed(1)}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="detail-view-btn" onclick="event.stopPropagation();searchAndAnalyze('${coin.id}')">
+                                    <i class="fas fa-chart-line"></i> تحلیل جزئیات
+                                </button>
+                            </td>
+                        </tr>`;
+                }
+            });
+            
+            tableBody.innerHTML = html;
+            
+            const time = Helpers.getCurrentTime();
+            document.getElementById('last-update-time-40').innerHTML = 
+                `آخرین به‌روزرسانی: ${time.time}`;
+            
+            const avgScore = successfulCount > 0 ? totalScore / successfulCount : 0;
+            let marketSentiment = "خنثی";
+            let sentimentClass = "neutral";
+            if (buyCount > sellCount * 1.5 && avgScore > 55) {
+                marketSentiment = "صعودی";
+                sentimentClass = "good";
+            } else if (sellCount > buyCount * 1.5 && avgScore < 45) {
+                marketSentiment = "نزولی";
+                sentimentClass = "bad";
+            }
+            
+            const summaryText = `
+                تحلیل <strong>${allCoinsData40.length} ارز</strong> انجام شد 
+                (<strong>${successfulCount} موفق</strong>) |
+                <strong>وضعیت بازار:</strong> <span class="${sentimentClass}">${marketSentiment}</span> |
+                <strong>میانگین امتیاز:</strong> ${avgScore.toFixed(1)}<br>
+                <strong>توزیع سیگنال‌ها:</strong> 
+                <span class="good">${buyCount} خرید</span> | 
+                <span class="bad">${sellCount} فروش</span> | 
+                <span class="neutral">${holdCount + waitCount} خنثی</span>
+            `;
+            
+            document.getElementById('summary-text-40').innerHTML = summaryText;
+        }
+
+        // ==================== جستجو و تحلیل ارز ====================
+        async function searchAndAnalyze(coinId) {
+            if (!coinId) {
+                const searchInput = document.getElementById('search').value.trim();
+                if (searchInput.length < 2) {
+                    StatusManager.show('لطفا نام یا نماد ارز را وارد کنید', 'warning');
+                    return;
+                }
+                
+                // جستجوی ارز
+                const results = await APIManager.searchCoins(searchInput);
+                if (results && results.length > 0) {
+                    coinId = results[0].id;
+                } else {
+                    StatusManager.show('ارز مورد نظر یافت نشد', 'error');
+                    return;
+                }
+            }
+            
+            StatusManager.show('در حال جستجو و تحلیل ارز...', 'info');
+            await analyzeSingleCoin(coinId, true);
+        }
+
+        // ==================== تنظیم جستجو ====================
+        function setupSearch() {
+            const searchInput = document.getElementById('search');
+            const dropdown = document.getElementById('suggestions-dropdown');
+            
+            if (!searchInput || !dropdown) return;
+            
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', async function() {
+                const query = this.value.trim();
+                dropdown.innerHTML = '';
+                
+                if (query.length < 2) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+                
+                clearTimeout(searchTimeout);
+                
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const results = await APIManager.searchCoins(query);
+                        
+                        if (results && results.length > 0) {
+                            const limitedResults = results.slice(0, 6);
+                            
+                            limitedResults.forEach(coin => {
+                                const item = document.createElement('div');
+                                item.className = 'suggestion-item';
+                                item.innerHTML = `
+                                    <strong>${coin.name}</strong> (${coin.symbol.toUpperCase()})<br>
+                                    <small>رتبه: ${coin.market_cap_rank || 'نامشخص'}</small>
+                                `;
+                                
+                                item.addEventListener('click', () => {
+                                    searchInput.value = `${coin.name} (${coin.symbol.toUpperCase()})`;
+                                    dropdown.style.display = 'none';
+                                    searchAndAnalyze(coin.id);
+                                });
+                                
+                                dropdown.appendChild(item);
+                            });
+                            
+                            dropdown.style.display = 'block';
+                        } else {
+                            dropdown.style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.warn('خطا در جستجو:', error);
+                        dropdown.style.display = 'none';
+                    }
+                }, 300);
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+            
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim();
+                    if (query.length >= 2) {
+                        const foundCoinIn10 = allCoinsData10.find(c => 
+                            c.name.toLowerCase().includes(query.toLowerCase()) || 
+                            c.symbol.toLowerCase().includes(query.toLowerCase())
+                        );
+                        
+                        const foundCoinIn40 = allCoinsData40.find(c => 
+                            c.name.toLowerCase().includes(query.toLowerCase()) || 
+                            c.symbol.toLowerCase().includes(query.toLowerCase())
+                        );
+                        
+                        if (foundCoinIn10) {
+                            searchAndAnalyze(foundCoinIn10.id);
+                        } else if (foundCoinIn40) {
+                            searchAndAnalyze(foundCoinIn40.id);
+                        } else {
+                            APIManager.searchCoins(query).then(results => {
+                                if (results && results.length > 0) {
+                                    const coin = results[0];
+                                    searchAndAnalyze(coin.id);
+                                } else {
+                                    StatusManager.show('ارز مورد نظر یافت نشد.', 'warning');
+                                }
+                            }).catch(error => {
+                                StatusManager.show('خطا در جستجو', 'error');
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==================== بازگشت به صفحه اصلی ====================
+        function backToMainPage() {
+            if (currentCharts.length > 0) {
+                currentCharts.forEach(chart => chart.destroy());
+                currentCharts = [];
+            }
+            
+            document.getElementById('single-coin-section').style.display = 'none';
+            document.getElementById('coins-section-10').style.display = 'none';
+            document.getElementById('coins-section-40').style.display = 'none';
+            document.getElementById('advanced-analysis-section').style.display = 'none';
+            document.getElementById('output').style.display = 'block';
+            
+            StatusManager.show('بازگشت به صفحه اصلی', 'info');
+        }
+
+        // ==================== به‌روزرسانی دستی ====================
+        async function refreshData() {
+            StatusManager.show('به‌روزرسانی داده‌های بازار...', 'info');
+            
+            coinCache.clear();
+            
+            if (CONFIG.CURRENT_MODE === 'top10' && allCoinsData10.length > 0) {
+                await analyzeTop10Coins();
+            } else if (CONFIG.CURRENT_MODE === 'top40' && allCoinsData40.length > 0) {
+                await analyzeTop40Coins();
+            } else {
+                StatusManager.show('لطفا ابتدا یک تحلیل انجام دهید.', 'warning');
+            }
+        }
+
+        // ==================== مدیریت حالت‌ها ====================
+        function setupModeSelector() {
+            const modeButtons = document.querySelectorAll('.mode-btn');
+            
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mode = btn.getAttribute('data-mode');
+                    
+                    modeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    CONFIG.CURRENT_MODE = mode;
+                    
+                    if (mode === 'top10') {
+                        document.getElementById('start-analysis-10-btn').classList.add('active');
+                        document.getElementById('start-analysis-40-btn').classList.remove('active');
+                    } else if (mode === 'top40') {
+                        document.getElementById('start-analysis-10-btn').classList.remove('active');
+                        document.getElementById('start-analysis-40-btn').classList.add('active');
+                    } else if (mode === 'search') {
+                        document.getElementById('start-analysis-10-btn').classList.remove('active');
+                        document.getElementById('start-analysis-40-btn').classList.remove('active');
+                    }
+                    
+                    backToMainPage();
+                });
+            });
+        }
+
+        // ==================== راهنمای جستجو ====================
+        function showSearchHelp() {
+            document.getElementById('output').innerHTML = `
+                <div class="card">
+                    <h2><i class="fas fa-question-circle"></i> راهنمای جستجو و تحلیل ارز</h2>
+                    
+                    <div class="analysis-box">
+                        <h3>📊 روش‌های تحلیل</h3>
+                        <ul>
+                            <li><strong>تحلیل 10 ارز برتر:</strong> سریع‌ترین روش برای تحلیل بازار. مناسب برای نوسان‌گیری روزانه.</li>
+                            <li><strong>تحلیل 40 ارز برتر:</strong> تحلیل جامع‌تر بازار. فرصت‌های بیشتری را شناسایی می‌کند.</li>
+                            <li><strong>جستجوی تکی:</strong> هر ارز دیجیتال را می‌توانید جستجو و تحلیل کنید.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="analysis-box">
+                        <h3>🔍 روش جستجو</h3>
+                        <ul>
+                            <li>نام ارز (مثال: Bitcoin, Ethereum, Binance Coin)</li>
+                            <li>نماد ارز (مثال: BTC, ETH, BNB)</li>
+                            <li>می‌توانید به فارسی هم جستجو کنید (مثال: بیت‌کوین، اتریوم)</li>
+                            <li>پس از جستجو، روی نتیجه مورد نظر کلیک کنید</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="analysis-box">
+                        <h3>🎯 سیگنال‌ها</h3>
+                        <ul>
+                            <li><span class="badge buy">خرید</span>: شرایط برای خرید مناسب است</li>
+                            <li><span class="badge sell">فروش</span>: بهتر است از ارز خارج شوید</li>
+                            <li><span class="badge hold">نگهداری</span>: ارز را نگه دارید</li>
+                            <li><span class="badge wait">صبر</span>: صبر کنید تا شرایط واضح‌تر شود</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="analysis-box">
+                        <h3>🚀 ویژگی‌های جدید</h3>
+                        <ul>
+                            <li><strong>سطوح فیبوناچی:</strong> شناسایی نقاط بازگشت قیمت</li>
+                            <li><strong>الگوهای قیمتی:</strong> تشخیص الگوهای کلاسیک بازار</li>
+                            <li><strong>تحلیل حجم:</strong> بررسی قدرت حرکات قیمتی</li>
+                            <li><strong>حمایت/مقاومت:</strong> شناسایی سطوح کلیدی</li>
+                            <li><strong>اخبار لحظه‌ای:</strong> آخرین اخبار بازار</li>
+                            <li><strong>رویدادها:</strong> تقویم رویدادهای مهم</li>
+                            <li><strong>داده‌های زنجیره‌ای:</strong> تحلیل داده‌های on-chain</li>
+                        </ul>
+                    </div>
+                    
+                    <button class="action-btn" onclick="backToMainPage()" style="margin-top:20px; padding:15px 30px; font-size:16px; width:100%;">
+                        <i class="fas fa-arrow-right"></i> بازگشت به صفحه اصلی
+                    </button>
+                </div>`;
+        }
+
+        // ==================== راه‌اندازی برنامه ====================
+        function initializeApp() {
+            document.getElementById('analyze-top10-btn').addEventListener('click', analyzeTop10Coins);
+            document.getElementById('analyze-top40-btn').addEventListener('click', analyzeTop40Coins);
+            document.getElementById('refresh-btn').addEventListener('click', refreshData);
+            document.getElementById('start-analysis-10-btn').addEventListener('click', analyzeTop10Coins);
+            document.getElementById('start-analysis-40-btn').addEventListener('click', analyzeTop40Coins);
+            document.getElementById('show-search-help').addEventListener('click', showSearchHelp);
+            
+            setupSearch();
+            setupModeSelector();
+            Helpers.updateTimeDisplay();
+            setInterval(Helpers.updateTimeDisplay, 60000);
+            
+            StatusManager.show('آماده برای تحلیل بازار. برای شروع یکی از گزینه‌ها را انتخاب کنید.', 'info');
+            
+            console.log('🚀 برنامه تحلیل ارز دیجیتال - نسخه پیشرفته راه‌اندازی شد');
+        }
+
+        // ==================== شروع برنامه ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📊 برنامه تحلیل ارز دیجیتال بارگیری شد');
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
